@@ -324,7 +324,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8576576463959329985}
-  - component: {fileID: 4876126758292913587}
+  - component: {fileID: 6612553645338531377}
   m_Layer: 0
   m_Name: mazePiecePrefab
   m_TagString: Untagged
@@ -352,7 +352,7 @@ Transform:
   - {fileID: 3296714982153968601}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4876126758292913587
+--- !u!114 &6612553645338531377
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -361,27 +361,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 1883999418599200443}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be77396d2f6ad8c46bf37fbf3051e04d, type: 3}
+  m_Script: {fileID: 11500000, guid: 90a7eab1f93c5a14da4f12238cdfc98e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   debugArrow: {fileID: 8379254196351591360}
-  wallFwdEnabled: 1
-  wallBackEnabled: 1
-  wallLeftEnabled: 1
-  wallRightEnabled: 1
   passed: 0
   debug: 0
   wallFwd: {fileID: 1061668976134166491}
   wallBack: {fileID: 7530314684126693776}
   wallLeft: {fileID: 3363012505402741333}
   wallRight: {fileID: 3753692841959320769}
-  gridPosition: {x: 0, y: 0, z: 0}
-  fromDirection: {x: 0, y: 0, z: 0}
-  adjacentPieceFwd: {fileID: 0}
-  adjacentPieceBack: {fileID: 0}
-  adjacentPieceLeft: {fileID: 0}
-  adjacentPieceRight: {fileID: 0}
-  debugBoxColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &3489324339130444066
 GameObject:
   m_ObjectHideFlags: 0
@@ -502,7 +491,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &3296714982153968601
 Transform:
   m_ObjectHideFlags: 0

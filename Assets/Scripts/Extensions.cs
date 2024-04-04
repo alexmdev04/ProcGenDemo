@@ -364,12 +364,13 @@ public static class Extensions
     {
         return Convert.ToBoolean(UnityEngine.Random.Range(0, 2));
     }
-    public static void IfFalseIgnore(this ref bool value, bool statement)
-    {
-        if (statement) { value = true; }
-    }
     public static void IfFalseIgnore(this ref bool value, bool statement, bool output = true)
     {
         if (statement) { value = output; }
+    }
+    public static bool IfFalseIgnore(bool value, bool statement, bool output = true)
+    {
+        if (statement) { return output; }
+        return value;
     }
 }

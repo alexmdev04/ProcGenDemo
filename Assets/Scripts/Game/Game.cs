@@ -24,9 +24,9 @@ public class Game : MonoBehaviour
     }
     public LayerMask defaultLayer;
     public static Game instance { get; private set; }
+    public System.Random random = new();
     public double clock { get; private set; }
     public Volume globalVolume;
-    public 
     void Awake()
     {
         instance = this;

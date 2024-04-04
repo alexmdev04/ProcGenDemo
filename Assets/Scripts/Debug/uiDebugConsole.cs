@@ -1,12 +1,10 @@
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using System.Linq;
 using System;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using System.Reflection;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 public class uiDebugConsole : MonoBehaviour
 {
@@ -81,6 +79,13 @@ public class uiDebugConsole : MonoBehaviour
     void Awake()
     {
         instance = this;
+        inputField = GetComponent<TMP_InputField>();
+        inputField.onSubmit.AddListener((string playerInput) => Command(playerInput));
+        gameObject.SetActive(false);
+        defaultProfile = Game.instance.globalVolume.profile;
+    }
+    void Start()
+    {
         // to add a new command, just duplicate a command below and replace the string with the 
         commands = new()
         {
@@ -93,17 +98,14 @@ public class uiDebugConsole : MonoBehaviour
             { "torch", torch },
             { "quit", quit },
             { "gfx", gfx },
-            { "debugUpdateRate", debugUpdateRate },
+            { "debugupdaterate", debugUpdateRate },
             { "interact", interact },
             { "iamspeed", ToggleSpeedometer },
+            { "showpath", MazeGen.instance.ToggleDebugCorrectPath },
             { "dev", dev },
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();
-        inputField = GetComponent<TMP_InputField>();
-        inputField.onSubmit.AddListener((string playerInput) => Command(playerInput) );
-        gameObject.SetActive(false);
-        defaultProfile = Game.instance.globalVolume.profile;
     }
     void Update()
     {
@@ -164,25 +166,27 @@ public class uiDebugConsole : MonoBehaviour
         {
             if (i + 1 == spaceIndexes.Count)
             {
-                returnInput.Add(new string(chars[(spaceIndexes[i]+1)..]));
+                returnInput.Add(new string(chars[(spaceIndexes[i] + 1)..]));
             }
             else
             {
-                returnInput.Add(new string(chars[(spaceIndexes[i]+1)..spaceIndexes[i + 1]]));
+                returnInput.Add(new string(chars[(spaceIndexes[i] + 1)..spaceIndexes[i + 1]]));
             }
         }
         consoleInput = returnInput.ToArray();
+
         return returnInput.ToArray();
     }
+
     void AutoFill()
     {
         char[] inputChars = inputField.text.ToCharArray();
-        List<string> 
+        List<string>
             matches = new(),
             currentCommandKeyList = commandKeyList;
         if (inputChars.Length > 0)
         { //  no worky
-            do 
+            do
             {
                 for (int b = 0; b < currentCommandKeyList.Count; b++)
                 {
@@ -226,7 +230,7 @@ public class uiDebugConsole : MonoBehaviour
     {
         string dataOutput = dataOverride == default ? consoleInput[1] : dataOverride;
         string commandOutput = commandOverride == default ? consoleInput[0] : commandOverride;
-        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);   
+        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);
     }
     public void InputMissing()
     {

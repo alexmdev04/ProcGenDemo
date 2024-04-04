@@ -3,65 +3,71 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MazePiece : MonoBehaviour
+public class MazePiece
 {
-    public GameObject debugArrow;
+    public GameObject 
+        debugArrow;
     public bool
+        passed,
+        debug,
         wallFwdEnabled,
         wallBackEnabled,
         wallLeftEnabled,
-        wallRightEnabled,
-        passed,
-        debug;
-    [SerializeField] GameObject 
-        wallFwd,
-        wallBack,
-        wallLeft,
-        wallRight;
+        wallRightEnabled;
+    //List<GameObject>
+    //    walls;
+    //List<MazePiece>
+    //    adjacentPieces;
     public Vector3Int 
         gridPosition,
-        fromDirection;
+        fromDirection,
+        debugDirection;
     public MazePiece
         adjacentPieceFwd,
         adjacentPieceBack,
         adjacentPieceLeft,
         adjacentPieceRight;
-    public Color debugBoxColor = Color.red;
-    void Awake()
-    {
-
-    }
-    void Start()
-    {
-        
-    }
-    void Update()
-    {
-        name = "mazePiece " + gridPosition.ToString();
-        wallFwd.SetActive(wallFwdEnabled);
-        wallBack.SetActive(wallBackEnabled);
-        wallLeft.SetActive(wallLeftEnabled);
-        wallRight.SetActive(wallRightEnabled);
-        debugArrow.SetActive(passed && debug);
-        if (passed && debug)
-        { 
-            Popcron.Gizmos.Bounds(new Bounds(transform.position + (Vector3Int.up * 10), Vector3.one * 10), debugBoxColor);
-            debugArrow.transform.localEulerAngles = new Vector3(0f, (-fromDirection).VectorNormalToCardinal().Euler(), 0f);
-        }
-    }
+    public Color 
+        debugBoxColor = Color.red;
+    //void Awake()
+    //{
+    //    walls = new List<GameObject>()
+    //    {
+    //        wallFwd,
+    //        wallBack,
+    //        wallLeft,
+    //        wallRight
+    //    };
+    //}
+    //void Update()
+    //{
+    //    //name = "mazePiece " + gridPosition.ToString();
+    //    debugArrow.SetActive(passed && debug);
+    //    if (passed && debug)
+    //    { 
+    //        Popcron.Gizmos.Bounds(new Bounds(transform.position + (Vector3Int.up * 10), Vector3.one * 10), debugBoxColor);
+    //        debugArrow.transform.localEulerAngles = new Vector3(0f, (debugDirection).VectorNormalToCardinal().Euler(), 0f);
+    //    }    
+    //}
     public void Refresh()
     {
         //RandomizeWalls();
         EdgeCheck();
         GetAdjacentPieces();
     }
-    void RandomizeWalls()
-    {
-        wallFwdEnabled = Extensions.RandomBool();
-        wallBackEnabled = Extensions.RandomBool();
-        wallLeftEnabled = Extensions.RandomBool();
-        wallRightEnabled = Extensions.RandomBool();
-    }
+    //void RandomizeWalls(int amount = 3, bool edgeCheck = true)
+    //{
+    //    amount = Math.Clamp(amount, 0, 3);
+    //    List<GameObject> randomWalls = new(walls);
+    //    randomWalls.ForEach(wall => wall.SetActive(true));
+    //    for (int i = 0; i < amount; i++)
+    //    {
+    //        int randomIndex = UnityEngine.Random.Range(0, randomWalls.Count);
+    //        randomWalls[randomIndex].SetActive(false);
+    //        randomWalls.RemoveAt(randomIndex);
+    //    }
+    //    if (edgeCheck) { EdgeCheck(); }
+    //}
     void EdgeCheck()
     {
         wallFwdEnabled.IfFalseIgnore(gridPosition.z == MazeGen.instance.mazeSize.z - 1);
@@ -71,12 +77,19 @@ public class MazePiece : MonoBehaviour
     }
     void GetAdjacentPieces()
     {
-        adjacentPieceFwd = SetAdjacentPiece(Vector3Int.forward);
-        adjacentPieceBack = SetAdjacentPiece(Vector3Int.back);
-        adjacentPieceRight = SetAdjacentPiece(Vector3Int.right);
-        adjacentPieceLeft = SetAdjacentPiece(Vector3Int.left);
+        adjacentPieceFwd = GetAdjacentPiece(Vector3Int.forward);    
+        adjacentPieceBack = GetAdjacentPiece(Vector3Int.back);
+        adjacentPieceLeft = GetAdjacentPiece(Vector3Int.left);
+        adjacentPieceRight = GetAdjacentPiece(Vector3Int.right);
+        //adjacentPieces = new()
+        //{
+        //    adjacentPieceFwd,
+        //    adjacentPieceBack,
+        //    adjacentPieceLeft,
+        //    adjacentPieceRight
+        //};
     }
-    MazePiece SetAdjacentPiece(Vector3Int direction)
+    MazePiece GetAdjacentPiece(Vector3Int direction)
     {
         //Debug.Log("piece " + gridPosition + ", is getting piece at " + (gridPosition + direction));
         if (MazeGen.instance.mazePiecesLookup.TryGetValue(gridPosition + direction, out MazePiece mazePiece)) { return mazePiece; }

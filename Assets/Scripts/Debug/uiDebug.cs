@@ -222,10 +222,10 @@ public class uiDebug : MonoBehaviour
 
 
         if (Input.GetKeyDown(KeyCode.F4)) { debugLines = debugMode && !debugLines; }
-        if (Input.GetKeyDown(KeyCode.F5)) { /* refresh scene */ }
+        if (Input.GetKeyDown(KeyCode.F5)) { MazeGen.instance.refresh = true; }
         if (Input.GetKeyDown(KeyCode.F6)) { ToggleNoclip(); }
         // 
-        if (Input.GetKeyDown(KeyCode.F8)) { ToggleNoclip(); }
+        if (Input.GetKeyDown(KeyCode.F8)) { MazeGen.instance.ToggleDebugCorrectPath(); }
         if (Input.GetKeyDown(KeyCode.F9)) { ui.instance.ToggleSpeedometer(); }
     }
     void Noclip()
