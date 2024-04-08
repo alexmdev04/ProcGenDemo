@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,95 +18,98 @@ public class MazeGen : MonoBehaviour
         mazeSize = Vector3Int.one * 4;
     public Dictionary<Vector3Int, MazePiece> 
         mazePiecesLookup = new();
-
     public GameObject
         mazePiecePrefab;
-    public float 
-        mazePieceSize = 10f;
-    [SerializeField] List<MazePiece>
+    public int 
+        mazePieceSize = 10;
+    public List<MazePiece>
         mazePieces = new(),
         mazeCorrectPath = new();
+    public MazePiece
+        mazePieceDefault = new();
     [SerializeField] GameObject
         floor;
-
     int 
         minimumFinalPathLength = 10;
 
+    public static Vector3Int[] directions = new Vector3Int[4] 
+    {
+        Vector3Int.forward,
+        Vector3Int.back,
+        Vector3Int.left,
+        Vector3Int.right
+    };
     void Awake()
     {
         instance = this;
     }
     void Start()
     {
-        //MazeGenerate();
+        MazeGenerate();
     }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.F5) || refresh)
         {
             refresh = false;
-
-            System.Diagnostics.Stopwatch stopwatch = new();
-            stopwatch.Start();
-
             MazeGenerate();
-
-            stopwatch.Stop();
-            Debug.Log("Maze generation time: " + stopwatch.Elapsed.TotalMilliseconds + "ms");
         }
     }
     void MazeGenerate()
     {
+        System.Diagnostics.Stopwatch stopwatch = new();
+        stopwatch.Start();
+
+        // RESETTING THE GRID
         debugBacktrackCount = 0;
         minimumFinalPathLength = (mazeSize.x * mazeSize.z) / 4;
-        //foreach (MazePiece mazePiece in mazePieces) { Destroy(mazePiece); }
+        foreach (Transform loadedMazePieceObject in transform) { Destroy(loadedMazePieceObject.gameObject); }
         mazePieces.Clear();
         mazePiecesLookup.Clear();
         mazeCorrectPath.Clear();
 
+        // TRANSFORMING FLOOR OBJECT
         floor.transform.localScale = new Vector3(mazeSize.x * 10, 1f, mazeSize.z * 10);
-        floor.transform.position = new Vector3((floor.transform.localScale.x / 2) - 5, 0.5f, (floor.transform.localScale.z / 2) - 5);
+        floor.transform.position = new Vector3(floor.transform.localScale.x / 2, 0.5f, floor.transform.localScale.z / 2);
 
+        // GENERATES AN EMPTY MAZE WITH EDGES
         MazeNew();
 
-        foreach (MazePiece mazePiece in mazePieces) { mazePiece.Refresh(); }
-
+        //
         GenerateCorrectPath();
-        //UnityEditor.EditorApplication.isPaused = true;
+
+        //
+        GenerateRemainingMaze();
+
+        stopwatch.Stop();
+        Debug.Log("Maze generation time: " + stopwatch.Elapsed.TotalMilliseconds + "ms");
+
+        //
+        MazeRenderer.instance.UpdateGrid();
     }
     void MazeNew()
     {
-        for (int a = 0; a < mazeSize.x; a++)
+        for (int x = 0; x < mazeSize.x; x++)
         {
-            for (int b = 0; b < mazeSize.z; b++)
+            for (int z = 0; z < mazeSize.z; z++)
             {
                 MazePiece mazePieceNewComponent = new();
-                Vector3Int mazePieceGridPosition = new Vector3Int(a, 0, b);
+                Vector3Int mazePieceGridPosition = new Vector3Int(x, 0, z);
                 mazePieceNewComponent.gridPosition = mazePieceGridPosition;
                 mazePieces.Add(mazePieceNewComponent);
                 mazePiecesLookup.Add(mazePieceGridPosition, mazePieceNewComponent);
-
-                //GameObject mazePieceNew = Instantiate(mazePiecePrefab);
-                //SceneManager.MoveGameObjectToScene(mazePieceNew, gameObject.scene);
-                //mazePieceNew.transform.parent = transform;
-                //mazePieceNew.name = "mazePiece @ " + mazePieceGridPosition.ToString();
-                //mazePieceNew.transform.position = (Vector3)mazePieceGridPosition * mazePieceSize;
             }
         }
+        foreach (MazePiece mazePiece in mazePieces) { mazePiece.Refresh(); }
     }
     void GenerateCorrectPath()
     {
         MazePiece startingPiece = mazePiecesLookup[Vector3Int.zero];
         startingPiece.passed = true;
-        MazePiece currentPiece = NextInPath(startingPiece, true, true);
+        MazePiece currentPiece = NextInPath(startingPiece, true);
         int piecesPassed = 0;
 
         NextPiece:
-
-        if (currentPiece == null)
-        {
-            Debug.LogError("currentPiece is null?");
-        }
 
         // CHECK FOR EDGE PIECE AND MINIMUM PATH LENGTH
         if ((currentPiece.gridPosition.x == 0
@@ -115,33 +119,31 @@ public class MazeGen : MonoBehaviour
             && piecesPassed > minimumFinalPathLength)
         {
             // SUCCESSFUL PATH
+            // currentPiece == EXIT
             currentPiece.OpenDirection(-currentPiece.fromDirection);
-            GenerateRemainingMaze();
             return;
         }
-        else
-        {
-            // NEXT PIECE IN PATH
-            currentPiece = NextInPath(currentPiece, true, true);
-            mazeCorrectPath.Add(currentPiece);
-            piecesPassed++;
-            goto NextPiece;
-        }
+        // NEXT PIECE IN PATH
+        currentPiece = NextInPath(currentPiece, true);
+        mazeCorrectPath.Add(currentPiece);
+        piecesPassed++;
+        goto NextPiece;
     }
-    MazePiece NextInPath(MazePiece currentPiece, bool refreshWhenStuck = false, bool isCorrectPath = false)
+    MazePiece NextInPath(MazePiece currentPiece, bool isCorrectPath = false)
     {
         currentPiece.debugBoxColor = Color.red;
 
         Backtrack:
         List<Vector3Int> availableDirections = new();
-        if (currentPiece.adjacentPieceFwd != null) { if (!currentPiece.adjacentPieceFwd.passed) { availableDirections.Add(Vector3Int.forward); } }
-        if (currentPiece.adjacentPieceBack != null) { if (!currentPiece.adjacentPieceBack.passed) { availableDirections.Add(Vector3Int.back); } }
-        if (currentPiece.adjacentPieceLeft != null) { if (!currentPiece.adjacentPieceLeft.passed) { availableDirections.Add(Vector3Int.left); } }
-        if (currentPiece.adjacentPieceRight != null) { if (!currentPiece.adjacentPieceRight.passed) { availableDirections.Add(Vector3Int.right); } }
-
+        for (int i = 0; i < currentPiece.adjacentPieces.Count; i++)
+        {
+            if (currentPiece.adjacentPieces[i] == null) { continue; }
+            if (!currentPiece.adjacentPieces[i].passed) availableDirections.Add(directions[i]);
+        }
         if (availableDirections.Count == 0)
         {
-            if (!isCorrectPath) { return null; }            
+            // RECURSIVE BACKTRACKING
+            if (!isCorrectPath) { return null; }      
             mazeCorrectPath.RemoveAt(mazeCorrectPath.Count - 1);
             currentPiece = mazeCorrectPath[^1];
             debugBacktrackCount++;
@@ -159,17 +161,15 @@ public class MazeGen : MonoBehaviour
     }
     void GenerateRemainingMaze()
     {
+
+        // 
+
         foreach (MazePiece mazePiece in mazePieces)
         {
             int adjacentsNotPassed = 4;
-            List<MazePiece> adjacentsPresent = new();
-
-            if (mazePiece.adjacentPieceFwd != null) { adjacentsPresent.Add(mazePiece.adjacentPieceFwd); }
-            else if (mazePiece.adjacentPieceBack != null) { adjacentsPresent.Add(mazePiece.adjacentPieceBack); }
-            else if (mazePiece.adjacentPieceLeft != null) { adjacentsPresent.Add(mazePiece.adjacentPieceLeft); }
-            else if (mazePiece.adjacentPieceRight != null) { adjacentsPresent.Add(mazePiece.adjacentPieceRight); }
-            foreach (MazePiece adjacentPiece in adjacentsPresent)
+            foreach (MazePiece adjacentPiece in mazePiece.adjacentPieces)
             {
+                if (adjacentPiece == null) { continue; }
                 if (adjacentPiece.passed) { adjacentsNotPassed--; }
             }
             if (adjacentsNotPassed >= 2)
@@ -177,15 +177,8 @@ public class MazeGen : MonoBehaviour
                 MazePiece currentPiece = NextInPath(mazePiece);
 
                 NextPiece:
-
-                if (currentPiece == null)
-                {
-                    // DEAD END SPINE PATH
-                    continue;
-                }
-
+                if (currentPiece == null) { continue; } // DEAD END SPINE PATH
                 currentPiece = NextInPath(currentPiece);
-
                 goto NextPiece;
             }
         }
@@ -194,9 +187,6 @@ public class MazeGen : MonoBehaviour
     {
         debugCorrectPath = !debugCorrectPath;
         mazeCorrectPath.ForEach(mazePiece => mazePiece.debug = debugCorrectPath);
-        if (debugCorrectPath)
-        {
-            mazeCorrectPath[^1].debugBoxColor = Color.cyan;
-        }
+        if (debugCorrectPath) { mazeCorrectPath[^1].debugBoxColor = Color.cyan; }
     }
 }

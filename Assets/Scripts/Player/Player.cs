@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
         moveActive = true;
     public Transform
         cameraTransformReadOnly;
+    public Vector3Int gridPosition;
     public float movementSpeedReadOnly { get; private set; }
     public Rigidbody rb { get; private set; }
 
@@ -121,6 +122,12 @@ public class Player : MonoBehaviour
     void LateUpdate()
     {
         if (lookActive) { Look(); }
+        Vector3Int gridPositionOld = gridPosition;
+        gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
+        if (gridPosition != gridPositionOld)
+        {
+            MazeRenderer.instance.UpdateGrid();
+        }
     }
     /// <summary>
     /// Controls the camera view of the player - where they are looking

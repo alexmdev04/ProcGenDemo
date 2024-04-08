@@ -1,27 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
+//[System.Serializable]
 public class MazePiece
 {
-    public GameObject 
-        debugArrow;
     public bool
-        passed,
-        debug,
-        wallFwdEnabled,
-        wallBackEnabled,
-        wallLeftEnabled,
-        wallRightEnabled;
+        passed = false,
+        debug = false,
+        wallFwdEnabled = true,
+        wallBackEnabled = true,
+        wallLeftEnabled = true,
+        wallRightEnabled = true;
     //List<GameObject>
     //    walls;
-    //List<MazePiece>
-    //    adjacentPieces;
+    public List<MazePiece>
+        adjacentPieces;
     public Vector3Int 
-        gridPosition,
-        fromDirection,
-        debugDirection;
+        gridPosition = Vector3Int.zero,
+        fromDirection = Vector3Int.zero,
+        debugDirection = Vector3Int.zero;
     public MazePiece
         adjacentPieceFwd,
         adjacentPieceBack,
@@ -29,6 +30,7 @@ public class MazePiece
         adjacentPieceRight;
     public Color 
         debugBoxColor = Color.red;
+    public LoadedMazePiece loadedMazePiece;
     //void Awake()
     //{
     //    walls = new List<GameObject>()
@@ -38,16 +40,6 @@ public class MazePiece
     //        wallLeft,
     //        wallRight
     //    };
-    //}
-    //void Update()
-    //{
-    //    //name = "mazePiece " + gridPosition.ToString();
-    //    debugArrow.SetActive(passed && debug);
-    //    if (passed && debug)
-    //    { 
-    //        Popcron.Gizmos.Bounds(new Bounds(transform.position + (Vector3Int.up * 10), Vector3.one * 10), debugBoxColor);
-    //        debugArrow.transform.localEulerAngles = new Vector3(0f, (debugDirection).VectorNormalToCardinal().Euler(), 0f);
-    //    }    
     //}
     public void Refresh()
     {
@@ -77,17 +69,17 @@ public class MazePiece
     }
     void GetAdjacentPieces()
     {
-        adjacentPieceFwd = GetAdjacentPiece(Vector3Int.forward);    
+        adjacentPieceFwd = GetAdjacentPiece(Vector3Int.forward);
         adjacentPieceBack = GetAdjacentPiece(Vector3Int.back);
         adjacentPieceLeft = GetAdjacentPiece(Vector3Int.left);
         adjacentPieceRight = GetAdjacentPiece(Vector3Int.right);
-        //adjacentPieces = new()
-        //{
-        //    adjacentPieceFwd,
-        //    adjacentPieceBack,
-        //    adjacentPieceLeft,
-        //    adjacentPieceRight
-        //};
+        adjacentPieces = new()
+        {
+            adjacentPieceFwd,
+            adjacentPieceBack,
+            adjacentPieceLeft,
+            adjacentPieceRight
+        };
     }
     MazePiece GetAdjacentPiece(Vector3Int direction)
     {

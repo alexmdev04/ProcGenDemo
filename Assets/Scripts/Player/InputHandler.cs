@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 
 public class InputHandler : MonoBehaviour
 { 
@@ -27,8 +28,14 @@ public class InputHandler : MonoBehaviour
         Player.instance.mouseDelta = input.Player.Look.ReadValue<Vector2>() * Player.instance.mouseDeltaMultiplier;
 
         // movement vector
-        Player.instance.movementDirection = input.Player.Move.ReadValue<Vector3>();
 
+        //Vector3 movementDirectionKBM = input.Player.Move.bindings[0]..ReadValue<Vector3>();
+        //Vector2 movementDirectionStick = input.Player.Move.ReadValue<Vector2>();
+        Vector2 movementDirectionVector2 = input.Player.Move.ReadValue<Vector2>();
+        Player.instance.movementDirection = new(movementDirectionVector2.x, 0, movementDirectionVector2.y);
+
+        //Player.instance.movementDirection = input.Player.Move.ReadValue<Vector3>();
+        
         // sprint
         Player.instance.SetSprint(input.Player.Sprint.IsPressed());
 
