@@ -75,16 +75,16 @@ public class MazeGen : MonoBehaviour
         // GENERATES AN EMPTY MAZE WITH EDGES
         MazeNew();
 
-        //
+        // 
         GenerateCorrectPath();
 
-        //
+        // 
         GenerateRemainingMaze();
 
         stopwatch.Stop();
         Debug.Log("Maze generation time: " + stopwatch.Elapsed.TotalMilliseconds + "ms");
 
-        //
+        // 
         MazeRenderer.instance.UpdateGrid();
     }
     void MazeNew()

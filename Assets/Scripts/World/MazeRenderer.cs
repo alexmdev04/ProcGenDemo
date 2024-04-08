@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.SceneManagement;
 
 public class MazeRenderer : MonoBehaviour
@@ -14,9 +15,33 @@ public class MazeRenderer : MonoBehaviour
     public List<LoadedMazePiece> mazePiecePool = new();
     public Stack<LoadedMazePiece> mazePiecePoolAvailable = new();
     public int poolAvailable;
+    public Queue<mazePiecePoolJob> mazePiecePoolQueue = new();
+    public int poolQueueSize;
+    public struct mazePiecePoolJob
+    {
+        public MazePiece mazePiece;
+        public LoadedMazePiece loadedMazePiece;
+        public bool isUnload;
+        public mazePiecePoolJob(MazePiece mazePieceToLoad)
+        {
+            isUnload = false;
+            mazePiece = mazePieceToLoad;
+            loadedMazePiece = null;
+        }
+        public mazePiecePoolJob(LoadedMazePiece mazePieceToUnload)
+        {
+            loadedMazePiece = mazePieceToUnload;
+            mazePiece = MazeGen.instance.mazePieceDefault;
+            isUnload = true;
+        }
+    }
     void Awake()
     {
         instance = this;
+    }
+    void Start()
+    {
+        StartCoroutine(UpdatePool());
     }
     void Update()
     {
@@ -26,11 +51,12 @@ public class MazeRenderer : MonoBehaviour
             UpdateGrid();
         }
         poolAvailable = mazePiecePoolAvailable.Count;
+        poolQueueSize = mazePiecePoolQueue.Count;
     }
     public void UpdateGrid()
     {
-        System.Diagnostics.Stopwatch stopwatch = new();
-        stopwatch.Start();
+        // System.Diagnostics.Stopwatch stopwatch = new();
+        // stopwatch.Start();
 
         int
             mazeGridCount = MazeGen.instance.mazeSize.x * MazeGen.instance.mazeSize.z,
@@ -65,14 +91,16 @@ public class MazeRenderer : MonoBehaviour
         // FINDS PIECES TO BE UNLOADED AND RETURNS THEM TO THE POOL        
         List<LoadedMazePiece> mazePiecesToUnload = new(loadedMazePieces);
         mazePiecesToLoad.ForEach(mazePiece => mazePiecesToUnload.Remove(mazePiece.loadedMazePiece));
-        mazePiecesToUnload.ForEach(mazePiece => ReturnToPool(mazePiece));
+        //mazePiecesToUnload.ForEach(mazePiece => ReturnToPool(mazePiece));
+        mazePiecesToUnload.ForEach(loadedMazePiece => mazePiecePoolQueue.Enqueue(new mazePiecePoolJob(loadedMazePiece)));
         loadedMazePieces.Clear();
 
         // LOADS MAZE PIECES
-        mazePiecesToLoad.ForEach(mazePiece => loadedMazePieces.Add(TakeFromPool(mazePiece)));
+        //mazePiecesToLoad.ForEach(mazePiece => loadedMazePieces.Add(TakeFromPool(mazePiece)));
+        mazePiecesToLoad.ForEach(mazePiece => mazePiecePoolQueue.Enqueue(new mazePiecePoolJob(mazePiece)));
 
-        stopwatch.Stop();
-        Debug.Log("Maze render time: " + stopwatch.Elapsed.TotalMilliseconds + "ms");
+        // stopwatch.Stop();
+        // Debug.Log("Maze render time: " + stopwatch.Elapsed.TotalMilliseconds + "ms");
     }
     void CreatePool(int poolSize)
     {
@@ -114,5 +142,18 @@ public class MazeRenderer : MonoBehaviour
         loadedMazePiece.gameObject.SetActive(false);
         loadedMazePiece.Refresh();
         mazePiecePoolAvailable.Push(loadedMazePiece);
+    }
+    readonly WaitForEndOfFrame waitForEndOfFrame = new();
+    public IEnumerator UpdatePool()
+    {
+        while (true)
+        {
+            if (mazePiecePoolQueue.TryDequeue(out mazePiecePoolJob currentJob))
+            {
+                if (currentJob.isUnload) { ReturnToPool(currentJob.loadedMazePiece); }
+                else { loadedMazePieces.Add(TakeFromPool(currentJob.mazePiece)); }
+            }
+            yield return waitForEndOfFrame;
+        }
     }
 }

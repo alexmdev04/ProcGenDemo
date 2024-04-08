@@ -158,7 +158,7 @@ MonoBehaviour:
   debugPathSlow: 0
   debugPathSlowSpeed: 1
   debugBacktrackCount: 0
-  mazeSize: {x: 100, y: 0, z: 100}
+  mazeSize: {x: 5, y: 0, z: 5}
   mazePiecePrefab: {fileID: 1883999418599200443, guid: f9861d5cfffa9a745a6a68100d7d503d,
     type: 3}
   mazePieceSize: 10
@@ -195,6 +195,7 @@ MonoBehaviour:
   renderDistance: 3
   mazePiecePool: []
   poolAvailable: 0
+  poolQueueSize: 0
 --- !u!1 &928205175
 GameObject:
   m_ObjectHideFlags: 0
