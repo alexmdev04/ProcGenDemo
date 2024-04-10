@@ -370,7 +370,6 @@ public static class Extensions
     }
     public static bool IfFalseIgnore(bool value, bool statement, bool output = true)
     {
-        if (statement) { return output; }
-        return value;
+        return statement ? output : value;
     }
 }

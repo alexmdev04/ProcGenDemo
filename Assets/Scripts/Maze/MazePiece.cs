@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 //[System.Serializable]
@@ -47,9 +43,9 @@ public class MazePiece
         EdgeCheck();
         GetAdjacentPieces();
     }
-    //void RandomizeWalls(int amount = 3, bool edgeCheck = true)
-    //{
-    //    amount = Math.Clamp(amount, 0, 3);
+    // void RandomizeWalls(int amount = 3, bool edgeCheck = true)
+    // {
+    //    amount = System.Math.Clamp(amount, 0, 3);
     //    List<GameObject> randomWalls = new(walls);
     //    randomWalls.ForEach(wall => wall.SetActive(true));
     //    for (int i = 0; i < amount; i++)
@@ -59,13 +55,13 @@ public class MazePiece
     //        randomWalls.RemoveAt(randomIndex);
     //    }
     //    if (edgeCheck) { EdgeCheck(); }
-    //}
+    // }
     void EdgeCheck()
     {
-        wallFwdEnabled.IfFalseIgnore(gridPosition.z == MazeGen.instance.mazeSize.z - 1);
-        wallBackEnabled.IfFalseIgnore(gridPosition.z == 0);
-        wallLeftEnabled.IfFalseIgnore(gridPosition.x == 0);
-        wallRightEnabled.IfFalseIgnore(gridPosition.x == MazeGen.instance.mazeSize.x - 1);
+        wallFwdEnabled |= gridPosition.z == MazeGen.instance.mazeSize.z - 1;
+        wallBackEnabled |= gridPosition.z == 0;
+        wallLeftEnabled |= gridPosition.x == 0;
+        wallRightEnabled |= gridPosition.x == MazeGen.instance.mazeSize.x - 1;
     }
     void GetAdjacentPieces()
     {
@@ -82,16 +78,33 @@ public class MazePiece
         };
     }
     MazePiece GetAdjacentPiece(Vector3Int direction)
-    {
-        //Debug.Log("piece " + gridPosition + ", is getting piece at " + (gridPosition + direction));
+    { // slowest part of MazeNew()
         if (MazeGen.instance.mazePiecesLookup.TryGetValue(gridPosition + direction, out MazePiece mazePiece)) { return mazePiece; }
         else { return null; }
     }
     public void OpenDirection(Vector3Int direction)
     {
-        wallFwdEnabled.IfFalseIgnore(direction == Vector3Int.forward, false);
-        wallBackEnabled.IfFalseIgnore(direction == Vector3Int.back, false);
-        wallLeftEnabled.IfFalseIgnore(direction == Vector3Int.left, false);
-        wallRightEnabled.IfFalseIgnore(direction == Vector3Int.right, false);
+        if (direction == Vector3Int.forward) 
+        {
+            wallFwdEnabled = false;
+        }
+        else if (direction == Vector3Int.back)
+        {
+            wallBackEnabled = false;
+        }
+        else if (direction == Vector3Int.left)
+        {
+            wallLeftEnabled = false;
+        }
+        else if (direction == Vector3Int.right)
+        {
+            wallRightEnabled = false;
+        }
+
+        //wallFwdEnabled = direction == Vector3Int.forward ? false : wallFwdEnabled;
+        //wallFwdEnabled.IfFalseIgnore(direction == Vector3Int.forward, false);
+        //wallBackEnabled.IfFalseIgnore(direction == Vector3Int.back, false);
+        //wallLeftEnabled.IfFalseIgnore(direction == Vector3Int.left, false);
+        //wallRightEnabled.IfFalseIgnore(direction == Vector3Int.right, false);
     }
 }

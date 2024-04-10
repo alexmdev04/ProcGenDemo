@@ -124,10 +124,9 @@ public class Player : MonoBehaviour
         if (lookActive) { Look(); }
         Vector3Int gridPositionOld = gridPosition;
         gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
-        if (gridPosition != gridPositionOld)
-        {
-            MazeRenderer.instance.UpdateGrid();
-        }
+        gridPosition.y = 0;
+        gridPositionOld.y = 0;
+        if (gridPosition != gridPositionOld) { MazeRenderer.instance.UpdateGrid(); }
     }
     /// <summary>
     /// Controls the camera view of the player - where they are looking
@@ -266,7 +265,8 @@ public class Player : MonoBehaviour
     /// <param name="worldSpaceEulerAngles"></param> 
     public void TeleportInstant(Vector3 worldSpacePosition, Vector3 worldSpaceEulerAngles)
     {
-        transform.position = worldSpacePosition;
+        rb.velocity = Vector3.zero;
+        rb.position = worldSpacePosition;
         playerEulerAngles.x = worldSpaceEulerAngles.y;
         float yAngle = 0;
         if (worldSpaceEulerAngles.x == 0) { yAngle = 0; }

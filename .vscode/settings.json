@@ -62,5 +62,7 @@
         "editor.foreground": "#fff",
         "statusBar.background": "#333",
         "statusBarItem.remoteBackground": "#555"
-    }
+    },
+    "editor.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true
 }

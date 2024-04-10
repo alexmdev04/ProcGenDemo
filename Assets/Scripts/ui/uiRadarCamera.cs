@@ -21,4 +21,12 @@ public class uiRadarCamera : MonoBehaviour
         playerIcon.transform.rotation = 
             Quaternion.Euler(0f, 0f, rotateWithPlayer ? 0 : -Player.instance.cameraTransformReadOnly.eulerAngles.y);
     }
+    void OnPreRender() 
+    {
+        RenderSettings.fog = false;
+    }
+    void OnPostRender() 
+    {
+        RenderSettings.fog = true;
+    }
 }

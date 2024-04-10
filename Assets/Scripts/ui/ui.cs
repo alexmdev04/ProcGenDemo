@@ -15,7 +15,9 @@ public class ui : MonoBehaviour
     //    uiObjectivePrefab,
     //    uiObjectivesParent;
     [SerializeField] TextMeshProUGUI 
-        uiSpeedometer;
+        uiSpeedometer,
+        uiMazeSize,
+        uiPlayerGridPosition;
     [SerializeField] Image 
         uiFade;
     [SerializeField] float 
@@ -42,6 +44,8 @@ public class ui : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)) { settings.gameObject.SetActive(!settings.gameObject.activeSelf); }
         uiFadeUpdate();
         uiSpeedometerUpdate();
+        uiMazeSizeUpdate();
+        uiPlayerGridPositionUpdate();
     }
     void Pause()
     {
@@ -55,10 +59,19 @@ public class ui : MonoBehaviour
         uiFade.color = new Color(0, 0, 0, System.Math.Clamp(uiFade.color.a + (uiFadeToBlack ? Time.deltaTime * uiFadeInSpeed : -Time.deltaTime * uiFadeOutSpeed), 0f, 1f));
         uiFadeAlpha = uiFade.color.a;
     }
+    public void uiFadeAlphaSet(float alpha) => uiFade.color = new Color(0, 0, 0, alpha);
     void uiSpeedometerUpdate()
     {
         uiSpeedometer.text = (Player.instance.playerSpeed > Player.instance.movementSpeedReadOnly ? "<color=green>" : "") +
             "<line-height=40%>" + Player.instance.playerSpeed + "\n" + "<size=50%>m/s";
+    }
+    void uiMazeSizeUpdate()
+    {
+        uiMazeSize.text = MazeGen.instance.mazeSize.x + "x" + MazeGen.instance.mazeSize.z;
+    }
+    void uiPlayerGridPositionUpdate()
+    {
+        uiPlayerGridPosition.text = "(" + Player.instance.gridPosition.x + "," + Player.instance.gridPosition.z + ")";
     }
     public void ToggleSpeedometer()
     {

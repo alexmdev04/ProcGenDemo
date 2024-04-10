@@ -364,18 +364,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a7eab1f93c5a14da4f12238cdfc98e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mazePiece:
-    passed: 0
-    debug: 0
-    wallFwdEnabled: 0
-    wallBackEnabled: 0
-    wallLeftEnabled: 0
-    wallRightEnabled: 0
-    gridPosition: {x: 0, y: 0, z: 0}
-    fromDirection: {x: 0, y: 0, z: 0}
-    debugDirection: {x: 0, y: 0, z: 0}
-    debugBoxColor: {r: 1, g: 0, b: 0, a: 1}
-    loadedMazePiece: {fileID: 0}
   debugArrow: {fileID: 8379254196351591360}
   wallFwd: {fileID: 1061668976134166491}
   wallBack: {fileID: 7530314684126693776}
@@ -534,6 +522,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: wallBack
       objectReference: {fileID: 0}
+    - target: {fileID: 6340734025744726570, guid: 59132479c7d94b54a8e61f17800bc078,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6823973500337718608, guid: 59132479c7d94b54a8e61f17800bc078,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -613,6 +606,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: wallFwd
+      objectReference: {fileID: 0}
+    - target: {fileID: 6340734025744726570, guid: 59132479c7d94b54a8e61f17800bc078,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6823973500337718608, guid: 59132479c7d94b54a8e61f17800bc078,
         type: 3}
@@ -694,6 +692,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: wallLeft
       objectReference: {fileID: 0}
+    - target: {fileID: 6340734025744726570, guid: 59132479c7d94b54a8e61f17800bc078,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6823973500337718608, guid: 59132479c7d94b54a8e61f17800bc078,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -773,6 +776,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: wallRight
+      objectReference: {fileID: 0}
+    - target: {fileID: 6340734025744726570, guid: 59132479c7d94b54a8e61f17800bc078,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6823973500337718608, guid: 59132479c7d94b54a8e61f17800bc078,
         type: 3}

@@ -75,7 +75,17 @@ public class uiDebugConsole : MonoBehaviour
     void dev() { }
     void menu() { }
     void player() { }
-
+    void renderdistance()
+    {
+        if (int.TryParse(consoleInput[1], out int renderDistance))
+        {
+            MazeRenderer.instance.SetRenderDistance(renderDistance);
+        }
+        else
+        {
+            InvalidInput();
+        }
+    }
     void Awake()
     {
         instance = this;
@@ -103,6 +113,7 @@ public class uiDebugConsole : MonoBehaviour
             { "iamspeed", ToggleSpeedometer },
             { "showpath", MazeGen.instance.ToggleDebugCorrectPath },
             { "dev", dev },
+            { "renderdistance", renderdistance }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();
