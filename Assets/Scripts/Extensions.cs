@@ -150,12 +150,35 @@ public static class Extensions
             .Append(vector3.y.ToString()).Append(ext_comma)
             .Append(vector3.z.ToString()).Append(ext_rightBracket);
     }
+        /// <summary>
+    /// Converts a Vector3Int to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector3"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector3Int vector3)
+    {
+        return new StringBuilder().Append(ext_leftBracket)
+            .Append(vector3.x.ToString()).Append(ext_comma)
+            .Append(vector3.y.ToString()).Append(ext_comma)
+            .Append(vector3.z.ToString()).Append(ext_rightBracket);
+    }
     /// <summary>
     /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
     /// </summary>
     /// <param name="vector2"></param>
     /// <returns></returns>
     public static StringBuilder ToStringBuilder(this Vector2 vector2)
+    {
+        return new StringBuilder().Append(ext_leftBracket)
+            .Append(vector2.x.ToString()).Append(ext_comma)
+            .Append(vector2.y.ToString()).Append(ext_rightBracket);
+    }
+    /// <summary>
+    /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector2"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector2Int vector2)
     {
         return new StringBuilder().Append(ext_leftBracket)
             .Append(vector2.x.ToString()).Append(ext_comma)

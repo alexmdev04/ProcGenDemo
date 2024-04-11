@@ -11,8 +11,6 @@ public class MazePiece
         wallBackEnabled = true,
         wallLeftEnabled = true,
         wallRightEnabled = true;
-    //List<GameObject>
-    //    walls;
     public List<MazePiece>
         adjacentPieces;
     public Vector3Int 
@@ -26,17 +24,9 @@ public class MazePiece
         adjacentPieceRight;
     public Color 
         debugBoxColor = Color.red;
-    public LoadedMazePiece loadedMazePiece;
-    //void Awake()
-    //{
-    //    walls = new List<GameObject>()
-    //    {
-    //        wallFwd,
-    //        wallBack,
-    //        wallLeft,
-    //        wallRight
-    //    };
-    //}
+    public LoadedMazePiece
+        loadedMazePiece;
+
     public void Refresh()
     {
         //RandomizeWalls();
@@ -78,33 +68,15 @@ public class MazePiece
         };
     }
     MazePiece GetAdjacentPiece(Vector3Int direction)
-    { // slowest part of MazeNew()
+    {
         if (MazeGen.instance.mazePiecesLookup.TryGetValue(gridPosition + direction, out MazePiece mazePiece)) { return mazePiece; }
         else { return null; }
     }
     public void OpenDirection(Vector3Int direction)
     {
-        if (direction == Vector3Int.forward) 
-        {
-            wallFwdEnabled = false;
-        }
-        else if (direction == Vector3Int.back)
-        {
-            wallBackEnabled = false;
-        }
-        else if (direction == Vector3Int.left)
-        {
-            wallLeftEnabled = false;
-        }
-        else if (direction == Vector3Int.right)
-        {
-            wallRightEnabled = false;
-        }
-
-        //wallFwdEnabled = direction == Vector3Int.forward ? false : wallFwdEnabled;
-        //wallFwdEnabled.IfFalseIgnore(direction == Vector3Int.forward, false);
-        //wallBackEnabled.IfFalseIgnore(direction == Vector3Int.back, false);
-        //wallLeftEnabled.IfFalseIgnore(direction == Vector3Int.left, false);
-        //wallRightEnabled.IfFalseIgnore(direction == Vector3Int.right, false);
+        if (direction == Vector3Int.forward) { wallFwdEnabled = false; }
+        else if (direction == Vector3Int.back) { wallBackEnabled = false; }
+        else if (direction == Vector3Int.left) { wallLeftEnabled = false; } 
+        else if (direction == Vector3Int.right) { wallRightEnabled = false; }
     }
 }

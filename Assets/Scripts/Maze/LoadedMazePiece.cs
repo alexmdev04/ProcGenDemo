@@ -1,8 +1,10 @@
+using System.Text;
 using UnityEngine;
 
 public class LoadedMazePiece : MonoBehaviour
 {
-    public MazePiece mazePiece;
+    public MazePiece 
+        mazePiece;
     public GameObject
         debugArrow;
     public GameObject
@@ -10,14 +12,12 @@ public class LoadedMazePiece : MonoBehaviour
         wallBack,
         wallLeft,
         wallRight;
-    void Update()
-    {
-        //Refresh();
-    }
+    const string 
+    str_mazePiece = "mazePiece ";
     public void Refresh()
     {
         gameObject.transform.position = mazePiece.gridPosition * MazeGen.instance.mazePieceSize;
-        name = "mazePiece " + mazePiece.gridPosition.ToString();
+        name = new StringBuilder(str_mazePiece).Append(mazePiece.gridPosition.ToStringBuilder()).ToString();
         wallFwd.SetActive(mazePiece.wallFwdEnabled);
         wallBack.SetActive(mazePiece.wallBackEnabled);
         wallLeft.SetActive(mazePiece.wallLeftEnabled);

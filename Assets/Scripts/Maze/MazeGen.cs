@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MazeGen : MonoBehaviour
@@ -128,7 +129,7 @@ public class MazeGen : MonoBehaviour
     }
     MazePiece NextInPath(MazePiece currentPiece, bool isCorrectPath = false)
     {
-        currentPiece.debugBoxColor = Color.red;
+        //currentPiece.debugBoxColor = Color.red;
 
         Backtrack:
         // GETS DIRECTIONS THE PATH CAN GO

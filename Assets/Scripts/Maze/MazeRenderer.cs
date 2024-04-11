@@ -18,6 +18,10 @@ public class MazeRenderer : MonoBehaviour
     public Stack<LoadedMazePiece> mazePiecePoolAvailable = new();
     public int poolAvailable;
     public int poolQueueSize;
+        const string
+        str_renderTime = "Render Update Time = ",
+        str_ms = "ms",
+        str_mazePiecePooled = "mazePiece (pooled)";
     void Awake()
     {
         instance = this;
@@ -75,9 +79,6 @@ public class MazeRenderer : MonoBehaviour
         timer.Stop();
         Debug.Log(new StringBuilder(str_renderTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
     }
-    const string
-        str_renderTime = "Render Update Time = ",
-        str_ms = "ms";
     public void SetRenderDistance(int renderDistanceNew)
     {
         renderDistance = renderDistanceNew;
@@ -131,7 +132,7 @@ public class MazeRenderer : MonoBehaviour
         loadedMazePiece.gameObject.SetActive(false);
         loadedMazePiece.mazePiece.loadedMazePiece = null;
         loadedMazePiece.mazePiece = MazeGen.instance.mazePieceDefault;
-        loadedMazePiece.gameObject.name = "mazePiece (pooled)";
+        loadedMazePiece.gameObject.name = str_mazePiecePooled;
         mazePiecePoolAvailable.Push(loadedMazePiece);
     }  
     int GetMazePiecePoolSize()
