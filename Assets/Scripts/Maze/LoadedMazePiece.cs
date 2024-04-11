@@ -13,7 +13,7 @@ public class LoadedMazePiece : MonoBehaviour
         wallLeft,
         wallRight;
     const string 
-    str_mazePiece = "mazePiece ";
+        str_mazePiece = "mazePiece ";
     public void Refresh()
     {
         gameObject.transform.position = mazePiece.gridPosition * MazeGen.instance.mazePieceSize;
@@ -23,9 +23,12 @@ public class LoadedMazePiece : MonoBehaviour
         wallLeft.SetActive(mazePiece.wallLeftEnabled);
         wallRight.SetActive(mazePiece.wallRightEnabled);
         debugArrow.SetActive(mazePiece.passed && mazePiece.debug);
-        if (mazePiece.passed && mazePiece.debug)
+    }
+    void Update()
+    {
+        if (mazePiece.debug)
         {
-            Popcron.Gizmos.Bounds(new Bounds(transform.position + (Vector3Int.up * 10), Vector3.one * 10), mazePiece.debugBoxColor);
+            Popcron.Gizmos.Bounds(new Bounds(transform.position + new Vector3(5f, 10f, 5f), Vector3.one * 10f), mazePiece.debugBoxColor);
             debugArrow.transform.localEulerAngles = new Vector3(0f, mazePiece.debugDirection.VectorNormalToCardinal().Euler(), 0f);
         }
     }

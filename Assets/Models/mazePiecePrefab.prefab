@@ -364,6 +364,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90a7eab1f93c5a14da4f12238cdfc98e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mazePiece:
+    passed: 0
+    debug: 0
+    wallFwdEnabled: 1
+    wallBackEnabled: 1
+    wallLeftEnabled: 1
+    wallRightEnabled: 1
+    gridPosition: {x: 0, y: 0, z: 0}
+    fromDirection: {x: 0, y: 0, z: 0}
+    debugDirection: {x: 0, y: 0, z: 0}
+    debugBoxColor: {r: 1, g: 0, b: 0, a: 1}
+    loadedMazePiece: {fileID: 0}
   debugArrow: {fileID: 8379254196351591360}
   wallFwd: {fileID: 1061668976134166491}
   wallBack: {fileID: 7530314684126693776}

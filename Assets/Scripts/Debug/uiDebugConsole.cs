@@ -111,9 +111,9 @@ public class uiDebugConsole : MonoBehaviour
             { "debugupdaterate", debugUpdateRate },
             { "interact", interact },
             { "iamspeed", ToggleSpeedometer },
-            { "showpath", MazeGen.instance.ToggleDebugCorrectPath },
             { "dev", dev },
-            { "renderdistance", renderdistance }
+            { "renderdistance", renderdistance },
+            { "rd", renderdistance }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();

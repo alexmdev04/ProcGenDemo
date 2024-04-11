@@ -1,27 +1,30 @@
 using System;
 using System.Collections;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     // this script controls everything about the player e.g. position, state, look, interact.
     public static Player instance { get; private set; }
-
-    public bool newMovement, frictionType;
+    public bool 
+        lookActive = true,
+        moveActive = true,
+        newMovement,
+        frictionType;
     public float
         groundedAccelerate = 15f,
         airAccelerate = 15f,
         acceleration = 15f,
         maxVelocityGrounded = 6.5f,
         maxVelocityAir = 6.5f;
-
     [Range(0.01f, 1f)] public float 
         friction1 = 0.7f;
     [Range(1f, 5f)] public float 
         friction2 = 1f;
-
-    [Space] public bool moveFixedUpdate;
+    [Space] public bool 
+        moveFixedUpdate;
     public Vector2 
         mouseDelta,
         mouseDeltaMultiplier = Vector2.one,
@@ -29,14 +32,21 @@ public class Player : MonoBehaviour
         playerEulerAngles;
     public Vector3
         movementDirection;//, fakeVelocity;
-    public bool 
-        lookActive = true,
-        moveActive = true;
     public Transform
         cameraTransformReadOnly;
-    public Vector3Int gridPosition;
-    public float movementSpeedReadOnly { get; private set; }
-    public Rigidbody rb { get; private set; }
+    public Vector3Int 
+        gridPosition;
+    public float 
+        movementSpeedReadOnly { get; private set; }
+    public Rigidbody 
+        rb { get; private set; }
+    public Game.Directions 
+        facingDirection;
+    public float 
+        playerSpeed;
+    public bool sprinting { get; private set; }
+    public bool crouched { get; private set; }
+    public bool grounded { get; private set; }
 
     [SerializeField, Range(0f, 0.99f)] float 
         friction = 0.85f;
@@ -59,30 +69,20 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject
         playerCapsule,
         groundedRayOrigin;
-    
-    public Game.Directions facingDirection;
 
-    /// <summary>
-    /// Takes a 0-359 euler angle and converts it to an 8 direction compass
-    /// </summary>
-    /// <param name="eulerY"></param>
-    /// <returns></returns>
-
-    public float playerSpeed;
     Vector3 
         smoothInputVelocity,
         smoothInput,
         walkingAnimVector,
         //cameraPositionOutput,
         positionLastFrame;
-    bool
-        sprinting,
-        crouched,
-        grounded;
     RigidbodyConstraints
         rbConstraintsDefault;
-
-    Vector3 debugForce, debugFlatvel;
+    Vector3 
+        debugForce,
+        debugFlatvel;
+    bool 
+        teleported;
 
     void Awake()
     {
@@ -92,9 +92,7 @@ public class Player : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         rb = GetComponent<Rigidbody>();
-        rbConstraintsDefault = rb.constraints;
-
-        
+        rbConstraintsDefault = rb.constraints;     
     }
     void Update()
     {
@@ -106,7 +104,6 @@ public class Player : MonoBehaviour
         Crouch();
         cameraTransformReadOnly.position = CameraHandler.mainCamera.transform.position;
         movementSpeedReadOnly = sprinting ? sprintSpeed : walkSpeed;
-        //VelocityFake();
         GroundedCheck();
         facingDirection = Extensions.EulerToCardinal(cameraTransformReadOnly.eulerAngles.y);
     }
@@ -114,19 +111,17 @@ public class Player : MonoBehaviour
     {
         if (moveActive && moveFixedUpdate) { Move(); }
     }
-    //void VelocityFake()
-    //{
-    //    fakeVelocity = Time.deltaTime == 0f ? Vector3.zero : ((rb.position - positionLastFrame) / Time.deltaTime).Round(fakeVelocityDecimals);
-    //    positionLastFrame = rb.position;
-    //}
     void LateUpdate()
     {
         if (lookActive) { Look(); }
-        Vector3Int gridPositionOld = gridPosition;
-        gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
-        gridPosition.y = 0;
-        gridPositionOld.y = 0;
-        if (gridPosition != gridPositionOld) { MazeRenderer.instance.UpdateGrid(); }
+        if (MazeGen.instance.mazeRenderAuto)
+        {
+            Vector3Int gridPositionOld = gridPosition;
+            gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
+            gridPosition.y = 0;
+            gridPositionOld.y = 0;
+            if (gridPosition != gridPositionOld) { MazeRenderer.instance.UpdateGrid(); }
+        }           
     }
     /// <summary>
     /// Controls the camera view of the player - where they are looking

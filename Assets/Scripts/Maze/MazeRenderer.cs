@@ -1,24 +1,23 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(MazeGen))]
 public class MazeRenderer : MonoBehaviour
 {
     public static MazeRenderer instance {  get; private set; }
-    public bool refresh;
-    public List<LoadedMazePiece> loadedMazePieces = new();
-    public int renderDistanceReadOnly = 3;
-    int renderDistance = 5;
-    public List<LoadedMazePiece> mazePiecePool = new();
-    public Stack<LoadedMazePiece> mazePiecePoolAvailable = new();
-    public int poolAvailable;
-    public int poolQueueSize;
-        const string
+    public bool refresh;      
+    int 
+        renderDistance = 3;
+    List<LoadedMazePiece> 
+        loadedMazePieces = new(),
+        mazePiecePool = new();
+    Stack<LoadedMazePiece>
+        mazePiecePoolAvailable = new();
+    const string
         str_renderTime = "Render Update Time = ",
         str_ms = "ms",
         str_mazePiecePooled = "mazePiece (pooled)";
@@ -33,7 +32,6 @@ public class MazeRenderer : MonoBehaviour
             refresh = false;
             UpdateGrid();
         }
-        poolAvailable = mazePiecePoolAvailable.Count;
     }
     public void Reset_()
     {
@@ -43,6 +41,7 @@ public class MazeRenderer : MonoBehaviour
     }
     public void UpdateGrid()
     {      
+        //return;
         System.Diagnostics.Stopwatch timer = new();
         timer.Start();
         // GETS ALL PIECES TO LOAD IN A 45 DEGREE ROTATED SQUARE GRID AROUND THE PLAYER
@@ -93,8 +92,8 @@ public class MazeRenderer : MonoBehaviour
 
         ResetPool();
 
-        // CREATES NEW POOL
-        // THE POOL SIZE IS EQUAL TO HOW MANY PIECES CAN BE LOADED AT ONCE WITH THE SET RENDER DISTANCE
+        /*  CREATES A NEW POOL WITH THE SIZE EQUAL TO THE MAX AMOUNT OF PIECES THAT CAN BE LOADED AT ONCE...
+            ...WITH THE CURRENT RENDER DISTANCE, WHILE ALSO NOT EXCEEDING THE TOTAL AMOUNT OF PIECES IN THE MAZE */
         for (int i = 0; i < poolSize; i++)
         {
             GameObject mazePieceNew = Instantiate(MazeGen.instance.mazePiecePrefab);
@@ -114,7 +113,7 @@ public class MazeRenderer : MonoBehaviour
     LoadedMazePiece TakeFromPool(MazePiece mazePiece)
     {
         // ASSIGNS A MazePiece TO A LoadedMazePiece FROM THE POOL, TO BE VISIBLE IN THE WORLD
-        if (mazePiece.loadedMazePiece != null) { return mazePiece.loadedMazePiece; }
+        if (mazePiece.loadedMazePiece is not null) { return mazePiece.loadedMazePiece; }
         if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePieceNew))
         {
             Debug.LogError("pool exceeded");
@@ -129,15 +128,17 @@ public class MazeRenderer : MonoBehaviour
     void ReturnToPool(LoadedMazePiece loadedMazePiece)
     {
         // RESETS THE LoadedMazePiece AND RETURNS IT TO THE POOL
+        loadedMazePiece.gameObject.name = str_mazePiecePooled;
         loadedMazePiece.gameObject.SetActive(false);
         loadedMazePiece.mazePiece.loadedMazePiece = null;
         loadedMazePiece.mazePiece = MazeGen.instance.mazePieceDefault;
-        loadedMazePiece.gameObject.name = str_mazePiecePooled;
         mazePiecePoolAvailable.Push(loadedMazePiece);
     }  
     int GetMazePiecePoolSize()
     {
-        int[] poolSizes = new int[7] { 0, 4, 16, 24, 40, 60, 84 };
-        return poolSizes[Math.Clamp(renderDistance, 1, 6)] + 1;
+        // GETS EXACTLY THE AMOUNT REQUIRED TO FILL THE RENDER DISTANCE WHILE NOT EXCEEDING THE MAZE SIZE
+        int poolSize = 1;
+        for (int i = 1; i <= renderDistance; i++) { poolSize += 4 * i; }
+        return (poolSize > MazeGen.instance.mazeSizeCount) ? MazeGen.instance.mazeSizeCount : poolSize;
     }
 }

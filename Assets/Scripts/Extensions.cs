@@ -385,7 +385,7 @@ public static class Extensions
     }
     public static bool RandomBool()
     {
-        return Convert.ToBoolean(UnityEngine.Random.Range(0, 2));
+        return Convert.ToBoolean(Game.instance.random.Next(0, 2));
     }
     public static void IfFalseIgnore(this ref bool value, bool statement, bool output = true)
     {
@@ -394,5 +394,16 @@ public static class Extensions
     public static bool IfFalseIgnore(bool value, bool statement, bool output = true)
     {
         return statement ? output : value;
+    }
+    public static int Diff(int value1, int value2)
+    {
+        int 
+            a = Math.Max(value1, value2),
+            b = Math.Min(value1, value2);
+        return a - b;
+    }
+    public static Vector3Int Diff(Vector3Int value1, Vector3Int value2)
+    {
+        return new Vector3Int(Diff(value1.x, value2.x), Diff(value1.y, value2.y), Diff(value1.z, value2.z));
     }
 }

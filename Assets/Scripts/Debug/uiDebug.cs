@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
-using static UnityEngine.Mathf;
-using DebugDraw = Popcron.Gizmos;
 
 public class uiDebug : MonoBehaviour
 {
@@ -197,7 +193,6 @@ public class uiDebug : MonoBehaviour
     }
     void Controls()
     {
-        // scroll to change hook distance
         //if (Input.GetKey(KeyCode.LeftControl))
         //{
         //    lensDistortion.intensity.value -= Input.mouseScrollDelta.y * 0.05f;
@@ -219,13 +214,10 @@ public class uiDebug : MonoBehaviour
         // enables debug notes on screen
         if (Input.GetKeyDown(KeyCode.Insert)) { showNotes = !showNotes; }
 
-
-
         if (Input.GetKeyDown(KeyCode.F4)) { debugLines = debugMode && !debugLines; }
         if (Input.GetKeyDown(KeyCode.F5)) { MazeGen.instance.refresh = true; }
         if (Input.GetKeyDown(KeyCode.F6)) { ToggleNoclip(); }
         // 
-        if (Input.GetKeyDown(KeyCode.F8)) { MazeGen.instance.ToggleDebugCorrectPath(); }
         if (Input.GetKeyDown(KeyCode.F9)) { ui.instance.ToggleSpeedometer(); }
     }
     void Noclip()
@@ -234,7 +226,7 @@ public class uiDebug : MonoBehaviour
         else { Player.instance.PlayerFreeze(true); }
         // wasd movement
         if (uiDebugConsole.instance.gameObject.activeSelf) { return; }
-        Player.instance.transform.position += noclipSpeed * Time.deltaTime * Player.instance.cameraTransformReadOnly.TransformDirection(new(Extensions.FloatFromAxis(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A)), 0, Extensions.FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S))));
+        Player.instance.transform.position += noclipSpeed * (Player.instance.sprinting ? 2 : 1) * Time.deltaTime * Player.instance.cameraTransformReadOnly.TransformDirection(new(Extensions.FloatFromAxis(Input.GetKey(KeyCode.D), Input.GetKey(KeyCode.A)), 0, Extensions.FloatFromAxis(Input.GetKey(KeyCode.W), Input.GetKey(KeyCode.S))));
     }
     public void ToggleNoclip()
     {

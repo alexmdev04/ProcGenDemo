@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-//[System.Serializable]
+[Serializable]
 public class MazePiece
 {
     public bool
@@ -11,7 +12,7 @@ public class MazePiece
         wallBackEnabled = true,
         wallLeftEnabled = true,
         wallRightEnabled = true;
-    public List<MazePiece>
+    [NonSerialized] public List<MazePiece> 
         adjacentPieces;
     public Vector3Int 
         gridPosition = Vector3Int.zero,
@@ -78,5 +79,15 @@ public class MazePiece
         else if (direction == Vector3Int.back) { wallBackEnabled = false; }
         else if (direction == Vector3Int.left) { wallLeftEnabled = false; } 
         else if (direction == Vector3Int.right) { wallRightEnabled = false; }
+    }
+    public List<Vector3Int> AvailableDirections()
+    {
+        List<Vector3Int> availableDirections = new();
+        for (int i = 0; i < adjacentPieces.Count; i++)
+        {
+            if (adjacentPieces[i] is null) { continue; }
+            if (!adjacentPieces[i].passed) availableDirections.Add(MazeGen.directions[i]);
+        }
+        return availableDirections;
     }
 }
