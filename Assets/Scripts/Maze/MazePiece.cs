@@ -12,7 +12,9 @@ public class MazePiece
         wallBackEnabled = true,
         wallLeftEnabled = true,
         wallRightEnabled = true;
-    [NonSerialized] public List<MazePiece> 
+    public bool[] 
+        walls;
+    [NonSerialized] public MazePiece[]
         adjacentPieces;
     public Vector3Int 
         gridPosition = Vector3Int.zero,
@@ -30,6 +32,7 @@ public class MazePiece
 
     public void Refresh()
     {
+        walls = new bool[4] { wallFwdEnabled, wallBackEnabled, wallLeftEnabled, wallRightEnabled };
         //RandomizeWalls();
         EdgeCheck();
         GetAdjacentPieces();
@@ -60,7 +63,7 @@ public class MazePiece
         adjacentPieceBack = GetAdjacentPiece(Vector3Int.back);
         adjacentPieceLeft = GetAdjacentPiece(Vector3Int.left);
         adjacentPieceRight = GetAdjacentPiece(Vector3Int.right);
-        adjacentPieces = new()
+        adjacentPieces = new MazePiece[4]
         {
             adjacentPieceFwd,
             adjacentPieceBack,
@@ -79,11 +82,12 @@ public class MazePiece
         else if (direction == Vector3Int.back) { wallBackEnabled = false; }
         else if (direction == Vector3Int.left) { wallLeftEnabled = false; } 
         else if (direction == Vector3Int.right) { wallRightEnabled = false; }
+        walls = new bool[4] { wallFwdEnabled, wallBackEnabled, wallLeftEnabled, wallRightEnabled };
     }
     public List<Vector3Int> AvailableDirections()
     {
         List<Vector3Int> availableDirections = new();
-        for (int i = 0; i < adjacentPieces.Count; i++)
+        for (int i = 0; i < adjacentPieces.Length; i++)
         {
             if (adjacentPieces[i] is null) { continue; }
             if (!adjacentPieces[i].passed) availableDirections.Add(MazeGen.directions[i]);

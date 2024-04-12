@@ -1,9 +1,5 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
-using Unity.VisualScripting;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MazeRenderer))]
@@ -23,8 +19,8 @@ public class MazeGen : MonoBehaviour
         mazePieceSize = 10,
         mazeSizeCount,
         goalMinimumDistanceFromStart;
-    public List<MazePiece>
-        mazePieces = new();
+    public MazePiece[]
+        mazePieces;
     public MazePiece
         mazePieceDefault { get; private set; } = new();
     public GameObject
@@ -32,8 +28,7 @@ public class MazeGen : MonoBehaviour
     MazePiece
         startingPiece;
     List<MazePiece> 
-        mazeCurrentPath = new(),
-        deadEnds = new();
+        mazeCurrentPath = new();
     public static Vector3Int[] directions = new Vector3Int[4] 
     {
         Vector3Int.forward,
@@ -58,7 +53,7 @@ public class MazeGen : MonoBehaviour
     }
     void MazeGenerate()
     {
-        if (mazePiecePrefab is null) { Debug.LogError("Maze Piece Prefab not assigned, check Assets/Models/"); return; }
+        if (mazePiecePrefab == null) { Debug.LogError("Maze Piece Prefab not assigned, check Assets/Models/"); return; }
 
         System.Diagnostics.Stopwatch timer = new();
         timer.Start();
@@ -70,21 +65,24 @@ public class MazeGen : MonoBehaviour
         MazeGridReset();
         MazeGridNew();
         MazeAlgorithm();
-        MazeRenderer.instance.Reset_();
-        //MazeRenderer.instance.
-        //MazeRenderer.instance.UpdateGrid();
-        
+        MazeRenderer.instance.Reset();
+  
         timer.Stop();
-        Debug.Log("Maze Generation + Initial Render = " + timer.Elapsed.TotalMilliseconds + "ms");
+        Debug.Log("Maze Generation Time = " + timer.Elapsed.TotalMilliseconds + "ms");
+
+        if (startingPiece.gridPosition == Player.instance.gridPosition) { MazeRenderer.instance.MazeRenderUpdate(); }
     }
     void MazeGridReset()
     {
+        mazeSizeCount = mazeSize.x * mazeSize.z;
         foreach (Transform loadedMazePieceObject in transform) { Destroy(loadedMazePieceObject.gameObject); }
-        mazePieces.Clear();
+        //mazePieces.Clear();
+        mazePieces = new MazePiece[mazeSizeCount];
         mazePiecesLookup.Clear();
     }
     void MazeGridNew()
     {
+        int index = 0;
         // CREATES AN EMPTY GRID
         for (int x = 0; x < mazeSize.x; x++)
         {
@@ -94,11 +92,11 @@ public class MazeGen : MonoBehaviour
                 MazePiece mazePieceNewComponent = new();
                 Vector3Int mazePieceGridPosition = new(x, 0, z);
                 mazePieceNewComponent.gridPosition = mazePieceGridPosition;
-                mazePieces.Add(mazePieceNewComponent);
+                mazePieces[index] = mazePieceNewComponent;
+                index++;
                 mazePiecesLookup.Add(mazePieceGridPosition, mazePieceNewComponent);
             }
         }
-        mazeSizeCount = mazePieces.Count;
         // SETS EDGE PIECES AND GETS ADJACENT PIECES
         foreach (MazePiece mazePiece in mazePieces) { mazePiece.Refresh(); }
     }
@@ -106,11 +104,12 @@ public class MazeGen : MonoBehaviour
     {
         // SETS THE START OF THE MAZE
         startingPiece = mazePiecesLookup[new Vector3Int(Game.instance.random.Next(mazeSize.x), 0, Game.instance.random.Next(mazeSize.z))];
-        startingPiece.debug = true;
-        startingPiece.debugBoxColor = Color.green;
         startingPiece.passed = true;
+        startingPiece.debugBoxColor = Color.green;
+        startingPiece.debug = true;
         mazeCurrentPath.Add(startingPiece);
         MazePiece currentPiece = NextInPath(startingPiece);
+        startingPiece.debugDirection = -currentPiece.fromDirection;
 
         NextPiece:
         // CHECK IF THE ALGORITHM HAS BACK TRACKED TO THE START
@@ -123,10 +122,19 @@ public class MazeGen : MonoBehaviour
         }
 
         // END OF MAZE GENERATION
-        MazePiece mazeExit = deadEnds[Game.instance.random.Next(deadEnds.Count)];
-        Debug.Log("start @ " + startingPiece.gridPosition + ", exit @ " + mazeExit.gridPosition);
-        mazeExit.debug = true;
+        int minDiff = goalMinimumDistanceFromStart;
+        NewEndPiece:
+        MazePiece[] potentialEndPieces = mazePieces
+            .Where(a => a.walls.Count(wallActive => wallActive) == 3)
+            .Where(b => Extensions.Diff(b.gridPosition.x, startingPiece.gridPosition.x) > minDiff 
+                     && Extensions.Diff(b.gridPosition.z, startingPiece.gridPosition.z) > minDiff).ToArray();
+        if (potentialEndPieces.Length == 0) { minDiff--; goto NewEndPiece; }
+        Vector3Int mazeExitPosition = potentialEndPieces[Game.instance.random.Next(potentialEndPieces.Length)].gridPosition;
+        MazePiece mazeExit = mazePiecesLookup[mazeExitPosition];
+        mazeExit.passed = true;
         mazeExit.debugBoxColor = Color.red;
+        mazeExit.debug = true;
+        Debug.Log("New Maze Complete, Start @ " + startingPiece.gridPosition + ", Exit @ " + mazeExit.gridPosition);
         return;
     }
     MazePiece NextInPath(MazePiece currentPiece)
@@ -140,11 +148,7 @@ public class MazeGen : MonoBehaviour
         {
             // RECURSIVE BACKTRACKING
             mazeCurrentPath.RemoveAt(mazeCurrentPath.Count - 1);
-            if (mazeCurrentPath.Count == 0) 
-            { 
-                deadEnds.Add(currentPiece);
-                return currentPiece;
-            }
+            if (mazeCurrentPath.Count == 0) { return currentPiece; }
             currentPiece = mazeCurrentPath[^1];
             goto Backtrack;
         }

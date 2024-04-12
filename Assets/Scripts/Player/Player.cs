@@ -120,7 +120,7 @@ public class Player : MonoBehaviour
             gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
             gridPosition.y = 0;
             gridPositionOld.y = 0;
-            if (gridPosition != gridPositionOld) { MazeRenderer.instance.UpdateGrid(); }
+            if (gridPosition != gridPositionOld) { MazeRenderer.instance.MazeRenderUpdate(); }
         }           
     }
     /// <summary>

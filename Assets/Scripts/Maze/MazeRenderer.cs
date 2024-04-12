@@ -18,7 +18,7 @@ public class MazeRenderer : MonoBehaviour
     Stack<LoadedMazePiece>
         mazePiecePoolAvailable = new();
     const string
-        str_renderTime = "Render Update Time = ",
+        str_renderTime = "Update Maze Time = ",
         str_ms = "ms",
         str_mazePiecePooled = "mazePiece (pooled)";
     void Awake()
@@ -30,16 +30,16 @@ public class MazeRenderer : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F7) || refresh)
         {
             refresh = false;
-            UpdateGrid();
+            MazeRenderUpdate();
         }
     }
-    public void Reset_()
+    public void Reset()
     {
         loadedMazePieces.Clear();
         ResetPool();
-        CreatePool(GetMazePiecePoolSize());
+        CreatePool(GetPoolSize());
     }
-    public void UpdateGrid()
+    public void MazeRenderUpdate()
     {      
         //return;
         System.Diagnostics.Stopwatch timer = new();
@@ -81,9 +81,10 @@ public class MazeRenderer : MonoBehaviour
     public void SetRenderDistance(int renderDistanceNew)
     {
         renderDistance = renderDistanceNew;
-        MazeGen.instance.mazePieces.ForEach(mazePiece => mazePiece.loadedMazePiece = null);
-        Reset_();
-        UpdateGrid();
+        foreach (MazePiece mazePiece in MazeGen.instance.mazePieces) { mazePiece.loadedMazePiece = null; }
+        //MazeGen.instance.mazePieces.ForEach(mazePiece => { mazePiece.loadedMazePiece = null; });
+        Reset();
+        MazeRenderUpdate();
     }
     void CreatePool(int poolSize, bool reset = false)
     {
@@ -113,7 +114,7 @@ public class MazeRenderer : MonoBehaviour
     LoadedMazePiece TakeFromPool(MazePiece mazePiece)
     {
         // ASSIGNS A MazePiece TO A LoadedMazePiece FROM THE POOL, TO BE VISIBLE IN THE WORLD
-        if (mazePiece.loadedMazePiece is not null) { return mazePiece.loadedMazePiece; }
+        if (mazePiece.loadedMazePiece != null) { return mazePiece.loadedMazePiece; }
         if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePieceNew))
         {
             Debug.LogError("pool exceeded");
@@ -134,7 +135,7 @@ public class MazeRenderer : MonoBehaviour
         loadedMazePiece.mazePiece = MazeGen.instance.mazePieceDefault;
         mazePiecePoolAvailable.Push(loadedMazePiece);
     }  
-    int GetMazePiecePoolSize()
+    int GetPoolSize()
     {
         // GETS EXACTLY THE AMOUNT REQUIRED TO FILL THE RENDER DISTANCE WHILE NOT EXCEEDING THE MAZE SIZE
         int poolSize = 1;
