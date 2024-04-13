@@ -371,6 +371,7 @@ MonoBehaviour:
     wallBackEnabled: 1
     wallLeftEnabled: 1
     wallRightEnabled: 1
+    walls: 
     gridPosition: {x: 0, y: 0, z: 0}
     fromDirection: {x: 0, y: 0, z: 0}
     debugDirection: {x: 0, y: 0, z: 0}

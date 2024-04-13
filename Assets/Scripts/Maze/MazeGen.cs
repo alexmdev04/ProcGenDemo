@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text;
 
 [RequireComponent(typeof(MazeRenderer))]
 public class MazeGen : MonoBehaviour
@@ -9,33 +10,39 @@ public class MazeGen : MonoBehaviour
     public bool 
         refresh,
         mazeRenderAuto = true;
-    public Vector3Int 
-        mazeSize = Vector3Int.one * 10;
-    public Dictionary<Vector3Int, MazePiece> 
-        mazePiecesLookup = new();
     public GameObject
         mazePiecePrefab;
     public int 
+        mazeSizeX = 10,
+        mazeSizeZ = 10,
         mazePieceSize = 10,
-        mazeSizeCount,
-        goalMinimumDistanceFromStart;
+        mazeSizeCount; 
     public MazePiece[]
-        mazePieces;
+        mazePieceGrid;
     public MazePiece
         mazePieceDefault { get; private set; } = new();
     public GameObject
         floor;
+    int
+        goalMinimumDistanceFromStart;
     MazePiece
-        startingPiece;
+        startPiece,
+        exitPiece;
+    HashSet<MazePiece> 
+        endPieces = new();
     List<MazePiece> 
         mazeCurrentPath = new();
-    public static Vector3Int[] directions = new Vector3Int[4] 
+    public static int[][] directions = new int[4][]
     {
-        Vector3Int.forward,
-        Vector3Int.back,
-        Vector3Int.left,
-        Vector3Int.right
+        new int[2]{ 0, 1 },
+        new int[2]{ 0 , -1 },
+        new int[2]{ -1 , 0 },
+        new int[2]{ 1 , 0 }
     };
+    const string 
+        str_mazeGenTime = "Maze Generation Time = ",
+        str_prefabError = "Maze Piece Prefab not assigned, check Assets/Models/",
+        str_ms = "ms";
     void Awake()
     {
         instance = this;
@@ -45,103 +52,102 @@ public class MazeGen : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F5) || refresh)
         {
             refresh = false;
-            ui.instance.uiFadeAlphaSet(1);
-            MazeGenerate();
-            Player.instance.TeleportInstant((startingPiece.gridPosition * mazePieceSize) + new Vector3(5f, 1.15f, 5f),
-                new Vector3(0f, startingPiece.debugDirection.VectorNormalToCardinal().Euler(), 0f));
+            Reset();
         }
+        if (Player.instance.gridIndex.Equals(exitPiece?.gridIndex)) { Win(); }
+    }
+    public void Reset()
+    {
+        ui.instance.uiFadeAlphaSet(1);
+        MazeGenerate();
+        Player.instance.TeleportInstant(startPiece.gridIndex.Multiply(mazePieceSize).ToVector() + new Vector3(5f, 1.15f, 5f),
+            new Vector3(0f, startPiece.toDirection.ToVector().VectorNormalToCardinal().Euler(), 0f));
+        ui.instance.settings.resetMessage.SetActive(false);
     }
     void MazeGenerate()
     {
-        if (mazePiecePrefab == null) { Debug.LogError("Maze Piece Prefab not assigned, check Assets/Models/"); return; }
+        if (mazePiecePrefab == null) { Debug.LogError(str_prefabError); return; }
 
         System.Diagnostics.Stopwatch timer = new();
         timer.Start();
 
         // TRANSFORMING FLOOR OBJECT
-        floor.transform.localScale = new Vector3(mazeSize.x * 10, 1f, mazeSize.z * 10);
+        floor.transform.localScale = new Vector3(mazeSizeX * 10, 1f, mazeSizeZ * 10);
         floor.transform.position = new Vector3(floor.transform.localScale.x / 2, 0.5f, floor.transform.localScale.z / 2);
+
+        goalMinimumDistanceFromStart = Mathf.CeilToInt(mazeSizeCount * 0.75f);
 
         MazeGridReset();
         MazeGridNew();
         MazeAlgorithm();
-        MazeRenderer.instance.Reset();
   
         timer.Stop();
-        Debug.Log("Maze Generation Time = " + timer.Elapsed.TotalMilliseconds + "ms");
+        uiMessage.instance.New(new StringBuilder(str_mazeGenTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
 
-        if (startingPiece.gridPosition == Player.instance.gridPosition) { MazeRenderer.instance.MazeRenderUpdate(); }
+        MazeRenderer.instance.Reset();
+        if (startPiece.gridIndex.EqualTo(Player.instance.gridIndex)) { MazeRenderer.instance.MazeRenderUpdate(); }
     }
     void MazeGridReset()
     {
-        mazeSizeCount = mazeSize.x * mazeSize.z;
+        mazeSizeCount = mazeSizeX * mazeSizeZ;
         foreach (Transform loadedMazePieceObject in transform) { Destroy(loadedMazePieceObject.gameObject); }
-        //mazePieces.Clear();
-        mazePieces = new MazePiece[mazeSizeCount];
-        mazePiecesLookup.Clear();
+        endPieces.Clear();
+        mazePieceGrid = new MazePiece[mazeSizeCount];
     }
     void MazeGridNew()
     {
         int index = 0;
         // CREATES AN EMPTY GRID
-        for (int x = 0; x < mazeSize.x; x++)
-        {
-            for (int z = 0; z < mazeSize.z; z++)
+        for (int x = 0; x < mazeSizeX; x++)
+        {           
+            for (int z = 0; z < mazeSizeZ; z++)
             {
                 // CREATES EMPTY MazePiece CLASS AND ADDS IT TO THE DICTIONARY
                 MazePiece mazePieceNewComponent = new();
-                Vector3Int mazePieceGridPosition = new(x, 0, z);
-                mazePieceNewComponent.gridPosition = mazePieceGridPosition;
-                mazePieces[index] = mazePieceNewComponent;
+                int[] mazePieceGridIndex = new int[2]{ x, z };
+                mazePieceNewComponent.gridIndex = mazePieceGridIndex;
+                mazePieceGrid[index] = mazePieceNewComponent;
                 index++;
-                mazePiecesLookup.Add(mazePieceGridPosition, mazePieceNewComponent);
             }
         }
         // SETS EDGE PIECES AND GETS ADJACENT PIECES
-        foreach (MazePiece mazePiece in mazePieces) { mazePiece.Refresh(); }
+        for (int i = 0; i < mazePieceGrid.Length; i++) { mazePieceGrid[i].Refresh(); }
     }
     void MazeAlgorithm()
     {
         // SETS THE START OF THE MAZE
-        startingPiece = mazePiecesLookup[new Vector3Int(Game.instance.random.Next(mazeSize.x), 0, Game.instance.random.Next(mazeSize.z))];
-        startingPiece.passed = true;
-        startingPiece.debugBoxColor = Color.green;
-        startingPiece.debug = true;
-        mazeCurrentPath.Add(startingPiece);
-        MazePiece currentPiece = NextInPath(startingPiece);
-        startingPiece.debugDirection = -currentPiece.fromDirection;
+        startPiece = mazePieceGrid[Game.instance.random.Next(mazeSizeCount)];
+        startPiece.passed = true;
+        startPiece.debugBoxColor = Color.green;
+        startPiece.debug = true;
+        mazeCurrentPath.Add(startPiece);
+        MazePiece currentPiece = NextInPath(startPiece);
+        startPiece.toDirection = currentPiece.fromDirection.Negative();
 
         NextPiece:
         // CHECK IF THE ALGORITHM HAS BACK TRACKED TO THE START
-        if (currentPiece != startingPiece)
+        if (currentPiece != startPiece)
         {
             // NEXT PIECE IN PATH
             mazeCurrentPath.Add(currentPiece);
             currentPiece = NextInPath(currentPiece);
+            if (currentPiece.IsEndPiece()) { endPieces.Add(currentPiece); }
             goto NextPiece;
         }
 
         // END OF MAZE GENERATION
-        int minDiff = goalMinimumDistanceFromStart;
-        NewEndPiece:
-        MazePiece[] potentialEndPieces = mazePieces
-            .Where(a => a.walls.Count(wallActive => wallActive) == 3)
-            .Where(b => Extensions.Diff(b.gridPosition.x, startingPiece.gridPosition.x) > minDiff 
-                     && Extensions.Diff(b.gridPosition.z, startingPiece.gridPosition.z) > minDiff).ToArray();
-        if (potentialEndPieces.Length == 0) { minDiff--; goto NewEndPiece; }
-        Vector3Int mazeExitPosition = potentialEndPieces[Game.instance.random.Next(potentialEndPieces.Length)].gridPosition;
-        MazePiece mazeExit = mazePiecesLookup[mazeExitPosition];
-        mazeExit.passed = true;
-        mazeExit.debugBoxColor = Color.red;
-        mazeExit.debug = true;
-        Debug.Log("New Maze Complete, Start @ " + startingPiece.gridPosition + ", Exit @ " + mazeExit.gridPosition);
+        exitPiece = GridIndexToMazePiece(GetExitPiecePosition());
+        exitPiece.passed = true;
+        exitPiece.debugBoxColor = Color.red;
+        exitPiece.debug = true;
+        //Debug.Log("New Maze Complete, Start @ " + startingPiece.gridIndex.ToStringBuilder() + ", Exit @ " + mazeExit.gridIndex.ToStringBuilder());
         return;
     }
     MazePiece NextInPath(MazePiece currentPiece)
     {
         Backtrack:
         // GETS DIRECTIONS THE PATH CAN GO
-        List<Vector3Int> availableDirections = currentPiece.AvailableDirections();
+        List<int[]> availableDirections = currentPiece.AvailableDirections();
         
         // CHECK FOR DEAD END
         if (availableDirections.Count == 0)
@@ -154,14 +160,53 @@ public class MazeGen : MonoBehaviour
         }
 
         // GOES TO A RANDOM PIECE WITHIN THE AVAILABLE DIRECTIONS
-        Vector3Int randomDirection = availableDirections[Game.instance.random.Next(availableDirections.Count)];
-        MazePiece nextPiece = mazePiecesLookup[currentPiece.gridPosition + randomDirection];
+        int[] randomDirection = availableDirections[Game.instance.random.Next(availableDirections.Count)];
+        MazePiece nextPiece = GridIndexToMazePiece(currentPiece.gridIndex.Plus(randomDirection));
 
         // OPENS THE PATHWAY BETWEEN THE PIECES
         currentPiece.OpenDirection(randomDirection);
-        nextPiece.OpenDirection(-randomDirection);
+        nextPiece.OpenDirection(randomDirection.Negative());
         nextPiece.passed = true;
-        nextPiece.fromDirection = -randomDirection;
+        nextPiece.fromDirection = randomDirection.Negative();
         return nextPiece;
+    }
+    int[] GetExitPiecePosition()
+    {
+        int minDiff = goalMinimumDistanceFromStart;
+        NewEndPiece:
+        IEnumerable<MazePiece> 
+            endPiecesOutsideMinDiff = endPieces.Where(b => Extensions.Diff(b.gridIndex[0], startPiece.gridIndex[0]) > minDiff 
+                                                        && Extensions.Diff(b.gridIndex[1], startPiece.gridIndex[1]) > minDiff);
+        int count = endPiecesOutsideMinDiff.Count();
+        if (count == 0) { minDiff--; goto NewEndPiece; }
+        return endPiecesOutsideMinDiff.ElementAt(Game.instance.random.Next(count)).gridIndex;
+    }
+    readonly string[] winMsgs = new string[] 
+    { 
+        "If I had a cookie I would not give it to you and pat you on the back instead.",
+        "Now go again.",
+        "If you win again you might just go insane!",
+        ""
+    };
+    void Win()
+    {
+        uiMessage.instance.New("You Win! " + winMsgs[Game.instance.random.Next(winMsgs.Length)]);
+        uiMessage.instance.SetTimer(5f);
+        refresh = true;
+    }
+    public bool TryGetMazePiece(int[] gridIndex, out MazePiece mazePiece)
+    {
+        mazePiece = null;
+        // RETURNS NULL IF gridIndex IS OUTSIDE THE MAZE
+        if (gridIndex[0] > mazeSizeX - 1 || gridIndex[0] < 0 || gridIndex[1] > mazeSizeZ - 1 || gridIndex[1] < 0) { return false; }
+        mazePiece = GridIndexToMazePiece(gridIndex);
+        return true;
+    }
+    public int GridIndexToMazePieceIndex(int[] gridIndex) => (gridIndex[0] * mazeSizeX) + gridIndex[1];
+    public MazePiece GridIndexToMazePiece(int[] gridIndex) 
+    {
+        int index = GridIndexToMazePieceIndex(gridIndex);
+        if (index > mazePieceGrid.Length - 1 || index < 0) { return null; }
+        return mazePieceGrid[index];
     }
 }

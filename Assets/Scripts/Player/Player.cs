@@ -34,8 +34,8 @@ public class Player : MonoBehaviour
         movementDirection;//, fakeVelocity;
     public Transform
         cameraTransformReadOnly;
-    public Vector3Int 
-        gridPosition;
+    public int[]
+        gridIndex = new int[2]{ 0, 0 };
     public float 
         movementSpeedReadOnly { get; private set; }
     public Rigidbody 
@@ -94,6 +94,10 @@ public class Player : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rbConstraintsDefault = rb.constraints;     
     }
+    void Start()
+    {
+        gridIndex = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize).ToIndex();
+    }
     void Update()
     {
         //Vector3 speedVector = movementDirection.Multiply(playerCapsule.transform.InverseTransformDirection(rb.velocity));
@@ -116,12 +120,10 @@ public class Player : MonoBehaviour
         if (lookActive) { Look(); }
         if (MazeGen.instance.mazeRenderAuto)
         {
-            Vector3Int gridPositionOld = gridPosition;
-            gridPosition = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize);
-            gridPosition.y = 0;
-            gridPositionOld.y = 0;
-            if (gridPosition != gridPositionOld) { MazeRenderer.instance.MazeRenderUpdate(); }
-        }           
+            int[] gridPositionOld = gridIndex;
+            gridIndex = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize).ToIndex();
+            if (!gridIndex.EqualTo(gridPositionOld)) { MazeRenderer.instance.MazeRenderUpdate(); }
+        }
     }
     /// <summary>
     /// Controls the camera view of the player - where they are looking

@@ -113,7 +113,8 @@ public class uiDebugConsole : MonoBehaviour
             { "iamspeed", ToggleSpeedometer },
             { "dev", dev },
             { "renderdistance", renderdistance },
-            { "rd", renderdistance }
+            { "rd", renderdistance },
+            { "reset", MazeGen.instance.Reset }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();

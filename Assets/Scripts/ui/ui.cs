@@ -67,11 +67,12 @@ public class ui : MonoBehaviour
     }
     void uiMazeSizeUpdate()
     {
-        uiMazeSize.text = MazeGen.instance.mazeSize.x + "x" + MazeGen.instance.mazeSize.z;
+        uiMazeSize.text = MazeGen.instance.mazeSizeX + "x" + MazeGen.instance.mazeSizeZ;
     }
     void uiPlayerGridPositionUpdate()
     {
-        uiPlayerGridPosition.text = "(" + Player.instance.gridPosition.x + "," + Player.instance.gridPosition.z + ")";
+        //uiPlayerGridPosition.text = "(" + Player.instance.gridPosition.x + "," + Player.instance.gridPosition.z + ")";
+        uiPlayerGridPosition.text = Player.instance.gridIndex.ToStringBuilder().ToString();
     }
     public void ToggleSpeedometer()
     {
