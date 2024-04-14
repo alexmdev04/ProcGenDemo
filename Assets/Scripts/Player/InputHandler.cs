@@ -17,7 +17,7 @@ public class InputHandler : MonoBehaviour
     }
     void Update()
     {
-        if (!active || uiDebugConsole.instance.gameObject.activeSelf) 
+        if (!active | uiDebugConsole.instance.gameObject.activeSelf) 
         {
             Player.instance.mouseDelta = Vector2.zero;
             Player.instance.movementDirection = Vector3.zero;

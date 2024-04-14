@@ -28,7 +28,7 @@ public class MazeRenderer : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F7) || refresh)
+        if (Input.GetKeyDown(KeyCode.F7) | refresh)
         {
             refresh = false;
             MazeRenderUpdate();
@@ -156,7 +156,7 @@ public class MazeRenderer : MonoBehaviour
         { 
             poolSize += 4 * i;
             poolSizeExceededMazeSize = poolSize > MazeGen.instance.mazeSizeCount;
-            if (poolSizeExceededMazeSize) { renderDistance = i; break; }
+            if (poolSizeExceededMazeSize) { renderDistance = i + 1; break; }
         }
         return poolSizeExceededMazeSize ? MazeGen.instance.mazeSizeCount : poolSize;
     }

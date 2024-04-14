@@ -367,14 +367,10 @@ MonoBehaviour:
   mazePiece:
     passed: 0
     debug: 0
-    wallFwdEnabled: 1
-    wallBackEnabled: 1
-    wallLeftEnabled: 1
-    wallRightEnabled: 1
     walls: 
-    gridPosition: {x: 0, y: 0, z: 0}
-    fromDirection: {x: 0, y: 0, z: 0}
-    debugDirection: {x: 0, y: 0, z: 0}
+    gridIndex: 0000000000000000
+    fromDirection: 000000000000000000000000
+    toDirection: 0000000000000000
     debugBoxColor: {r: 1, g: 0, b: 0, a: 1}
     loadedMazePiece: {fileID: 0}
   debugArrow: {fileID: 8379254196351591360}

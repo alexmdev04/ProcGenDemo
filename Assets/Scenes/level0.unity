@@ -157,12 +157,13 @@ MonoBehaviour:
   mazeRenderAuto: 1
   mazePiecePrefab: {fileID: 1883999418599200443, guid: f9861d5cfffa9a745a6a68100d7d503d,
     type: 3}
-  mazeSizeX: 100
-  mazeSizeZ: 100
+  mazeSizeX: 10
+  mazeSizeZ: 10
   mazePieceSize: 10
   mazeSizeCount: 0
   mazePieceGrid: []
   floor: {fileID: 928205175}
+  iterations: 0
 --- !u!4 &528073590
 Transform:
   m_ObjectHideFlags: 0

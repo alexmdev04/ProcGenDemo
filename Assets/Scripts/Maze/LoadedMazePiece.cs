@@ -22,7 +22,7 @@ public class LoadedMazePiece : MonoBehaviour
         wallBack.SetActive(mazePiece.walls[1]);
         wallLeft.SetActive(mazePiece.walls[2]);
         wallRight.SetActive(mazePiece.walls[3]);
-        debugArrow.SetActive(mazePiece.passed && mazePiece.debug);
+        debugArrow.SetActive(mazePiece.passed & mazePiece.debug);
     }
     void Update()
     {

@@ -125,7 +125,7 @@ public class uiDebug : MonoBehaviour
             if (!uiFPSEnabled) uiFPS.SetActive(debugMode);
         }
         uiDebugGroup.SetActive(debugMode);
-        if (debugMode && !uiDebugConsole.instance.gameObject.activeSelf) { Controls(); }
+        if (debugMode & !uiDebugConsole.instance.gameObject.activeSelf) { Controls(); }
         /* toggles debug console -> */ if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.Tilde)) { uiDebugConsole.instance.gameObject.SetActive(!uiDebugConsole.instance.gameObject.activeSelf); }
         Noclip();
         Player.instance.moveActive = !noclipEnabled;

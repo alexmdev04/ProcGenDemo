@@ -129,7 +129,7 @@ public static class Extensions
     /// <returns></returns>
     public static float CalcGCD(float a, float b)
     {
-        while (a != 0f && b != 0f)
+        while (a != 0f & b != 0f)
         {
             if (a > b)
                 a %= b;
@@ -398,16 +398,9 @@ public static class Extensions
     {
         return statement ? output : value;
     }
-    public static int Diff(int value1, int value2)
-    {
-        int 
-            a = Math.Max(value1, value2),
-            b = Math.Min(value1, value2);
-        return a - b;
-    }
     public static Vector3Int Diff(Vector3Int value1, Vector3Int value2)
     {
-        return new Vector3Int(Diff(value1.x, value2.x), Diff(value1.y, value2.y), Diff(value1.z, value2.z));
+        return new Vector3Int(Math.Abs(value1.x - value2.x), Math.Abs(value1.y - value2.y), Math.Abs(value1.z - value2.z));
     }
     // i know these aren't null/length checked, but I'm lazy
     public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
