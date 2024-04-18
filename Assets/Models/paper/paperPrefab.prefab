@@ -35,7 +35,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 5}
+  m_SizeDelta: {x: 2, y: 3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &1356615562994226791
 MeshRenderer:
@@ -111,8 +111,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4284053643
+  m_fontColor: {r: 0.54509807, g: 0.47058827, b: 0.34901962, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -135,7 +135,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -225,17 +225,17 @@ PrefabInstance:
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
@@ -300,6 +300,7 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmplitude: 0.25
   count: {fileID: 946221994795544044}
+  gridIndex: 
 --- !u!65 &6206846060341099302
 BoxCollider:
   m_ObjectHideFlags: 0

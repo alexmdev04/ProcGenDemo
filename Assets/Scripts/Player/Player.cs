@@ -96,7 +96,7 @@ public class Player : MonoBehaviour
     }
     void Start()
     {
-        gridIndex = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize).ToIndex();
+        gridIndex = transform.position.WorldPositionToGridIndex();
     }
     void Update()
     {
@@ -121,7 +121,7 @@ public class Player : MonoBehaviour
         if (MazeGen.instance.mazeRenderAuto)
         {
             int[] gridPositionOld = gridIndex;
-            gridIndex = Vector3Int.FloorToInt(transform.position / MazeGen.instance.mazePieceSize).ToIndex();
+            gridIndex = transform.position.WorldPositionToGridIndex();
             if (!gridIndex.EqualTo(gridPositionOld)) { MazeRenderer.instance.MazeRenderUpdate(); }
         }
     }

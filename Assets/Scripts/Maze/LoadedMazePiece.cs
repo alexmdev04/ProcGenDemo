@@ -11,17 +11,19 @@ public class LoadedMazePiece : MonoBehaviour
         wallFwd,
         wallBack,
         wallLeft,
-        wallRight;
+        wallRight,
+        paper;
     const string 
         str_mazePiece = "mazePiece ";
     public void Refresh()
     {
-        gameObject.transform.position = mazePiece.gridIndex.ToWorldPosition();
+        gameObject.transform.position = mazePiece.gridIndex.GridIndexToWorldPosition();
         name = new StringBuilder(str_mazePiece).Append(mazePiece.gridIndex.ToStringBuilder()).ToString();
         wallFwd.SetActive(mazePiece.walls[0]);
         wallBack.SetActive(mazePiece.walls[1]);
         wallLeft.SetActive(mazePiece.walls[2]);
         wallRight.SetActive(mazePiece.walls[3]);
+        paper.SetActive(mazePiece.hasPaper);
         debugArrow.SetActive(mazePiece.passed & mazePiece.debug);
     }
     void Update()

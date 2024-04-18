@@ -15,7 +15,6 @@ public static class Extensions
         str_timeMinutes = "m ",
         str_timeSeconds = "s ",
         str_commaSpace = ", ",
-        str_comma = ",",
         str_leftBracket = "(",
         str_rightBracket = ")",
         str_notApplicable = "n/a",
@@ -403,26 +402,58 @@ public static class Extensions
         return new Vector3Int(Math.Abs(value1.x - value2.x), Math.Abs(value1.y - value2.y), Math.Abs(value1.z - value2.z));
     }
     // i know these aren't null/length checked, but I'm lazy
-    public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
-    public static int[] Plus    (this int[] value1, int   value2) => new int[2] { value1[0] + value2,    value1[1] + value2    };
-    public static int[] Subtract(this int[] value1, int[] value2) => new int[2] { value1[0] - value2[0], value1[1] - value2[1] };
-    public static int[] Subtract(this int[] value1, int   value2) => new int[2] { value1[0] - value2,    value1[1] - value2    };
-    public static int[] Multiply(this int[] value1, int[] value2) => new int[2] { value1[0] * value2[0], value1[1] * value2[1] };
-    public static int[] Multiply(this int[] value1, int   value2) => new int[2] { value1[0] * value2,    value1[1] * value2    };
-    public static int[] Divide  (this int[] value1, int[] value2) => new int[2] { value1[0] / value2[0], value1[1] / value2[1] };
-    public static int[] Divide  (this int[] value1, int   value2) => new int[2] { value1[0] / value2,    value1[1] / value2    };
+    
+    public static void Add<T>(this T[] array, T value)
+    {
+        Array.Resize<T>(ref array, array.Length + 1);
+        array[^1] = value;
+    }
+    public static void RemoveLast<T>(this T[] array)
+    {
+        array[^1] = default(T);
+        Array.Resize<T>(ref array, array.Length - 1);
+    }
+}
+public static class GridIndexExt 
+{
+    const string         
+        str_comma = ",",
+        str_leftBracket = "(",
+        str_rightBracket = ")";
+
+    //public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
+    //public static int[] Plus    (this int[] value1, int   value2) => new int[2] { value1[0] + value2,    value1[1] + value2    };
+    public static void  Plus    (ref int[] value1, ref int[] value2) { value1[0] += value2[0]; value1[1] += value2[1]; }
+    public static int[] Plus    (int[] value1, int[] value2) { return new int[2]{ value1[0] + value2[0], value1[1] + value2[1] }; }
+    public static void  Plus    (ref int[] value1, ref int value2) { value1[0] += value2; value1[1] += value2; }
+    public static int[] Plus    (int[] value1, int value2) { value1[0] += value2; value1[1] += value2; return value1; }
+    // public static int[] Subtract(this int[] value1, int[] value2) => new int[2] { value1[0] - value2[0], value1[1] - value2[1] };
+    // public static int[] Subtract(this int[] value1, int   value2) => new int[2] { value1[0] - value2,    value1[1] - value2    };
+    public static void  Subtract(ref int[] value1, ref int[] value2) { value1[0] -= value2[0]; value1[1] -= value2[1]; }
+    public static void  Subtract(ref int[] value1, ref int   value2) { value1[0] -= value2; value1[1] -= value2; }
+    // public static int[] Multiply(this int[] value1, int[] value2) => new int[2] { value1[0] * value2[0], value1[1] * value2[1] };
+    // public static int[] Multiply(this int[] value1, int   value2) => new int[2] { value1[0] * value2,    value1[1] * value2    };
+    public static void  Multiply(ref int[] value1, ref int[] value2) { value1[0] *= value2[0]; value1[1] *= value2[1]; }
+    public static void  Multiply(ref int[] value1, ref int   value2) { value1[0] *= value2; value1[1] *= value2; }
+    // public static int[] Divide  (this int[] value1, int[] value2) => new int[2] { value1[0] / value2[0], value1[1] / value2[1] };
+    // public static int[] Divide  (this int[] value1, int   value2) => new int[2] { value1[0] / value2,    value1[1] / value2    };
+    public static void  Divide  (ref int[] value1, ref int[] value2) { value1[0] /= value2[0]; value1[1] /= value2[1]; }
+    public static void  Divide  (ref int[] value1, ref int   value2) { value1[0] /= value2; value1[1] /= value2; }
+    public static void  Negative(ref int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; }
+    public static int[] Negative(int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; return value; }
+
     public static Vector3Int ToVector(this int[] value) => new(value[0], 0, value[1]);
     public static Vector3Int ToVector(this int[] value, int y) => new(value[0], y, value[1]);
     public static Vector3Int ToVector(this int[] value, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, 0, value[1] * scaleZ);
-    public static Vector3Int ToWorldPosition(this int[] value, int y = 0) => new((value[0]) * MazeGen.instance.mazePieceSize, y, (value[1]) * MazeGen.instance.mazePieceSize);
     public static Vector3Int ToVector(this int[] value, int y, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, y, value[1] * scaleZ);
-    public static int[] ToIndex(this Vector3Int value) => new int[2]{ value.x, value.z };
+
+    public static Vector3 GridIndexToWorldPosition(this int[] value, int y = 0) => new(value[0] * MazeGen.instance.mazePieceSize, y, value[1] * MazeGen.instance.mazePieceSize);
+    public static int[] WorldPositionToGridIndex(this Vector3 value) => new int[2]{ Mathf.FloorToInt(value.x / MazeGen.instance.mazePieceSize), Mathf.FloorToInt(value.z / MazeGen.instance.mazePieceSize) };
     public static StringBuilder ToStringBuilder(this int[] value) // this one is tho
     {
         if (value.Length == 0) { return new StringBuilder(); }
         return new StringBuilder(str_leftBracket).Append(value[0].ToString()).Append(str_comma).Append(value[1].ToString()).Append(str_rightBracket);
     }
-    public static int[] Negative(this int[] value) => new int[2] { -value[0], -value[1] };
     public static bool EqualTo(this int[] x, int[] y)
     {
         if (x.Length != y.Length)
@@ -437,15 +468,5 @@ public static class Extensions
             }
         }
         return true;
-    }
-    public static void Add<T>(this T[] array, T value)
-    {
-        Array.Resize<T>(ref array, array.Length + 1);
-        array[^1] = value;
-    }
-    public static void RemoveLast<T>(this T[] array)
-    {
-        array[^1] = default(T);
-        Array.Resize<T>(ref array, array.Length - 1);
     }
 }

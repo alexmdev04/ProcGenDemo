@@ -10,7 +10,9 @@ public class Collectable : MonoBehaviour
     [SerializeField] bool bob = true;
     [SerializeField] float bobSpeed = 5f;
     [SerializeField] float bobAmplitude = 1f;
-    [Space] [SerializeField] TMPro.TextMeshPro count;
+    [Space] 
+    [SerializeField] TMPro.TextMeshPro count;
+    [SerializeField] int[] gridIndex;
     float startYPosition;
 
     // Checks if this object collides with the player
@@ -23,7 +25,7 @@ public class Collectable : MonoBehaviour
         }
     }
     
-    void Start() { startYPosition = transform.position.y; } // Sets the start position for use with bobbing
+    void Start() { startYPosition = transform.position.y; gridIndex = transform.position.WorldPositionToGridIndex(); } // Sets the start position for use with bobbing
     
     void Update() // Iterates on the position and rotation of the object to give a bobbing and spinning effect
     {

@@ -13,7 +13,7 @@ public class MazeGen : MonoBehaviour
         mazeRenderAuto = true;
     public GameObject
         mazePiecePrefab,
-        paperPrefab,
+        //paperPrefab,
         enemy;
     public int 
         mazeSizeX = 10,
@@ -44,12 +44,13 @@ public class MazeGen : MonoBehaviour
         mazeCurrentPath;
     public bool 
         resetOnWin, won;
-    public static int[][] directions = new int[4][]
+    public static readonly int[][] directions = new int[5][]
     {
         new int[2]{ 0, 1 },
-        new int[2]{ 0 , -1 },
-        new int[2]{ -1 , 0 },
-        new int[2]{ 1 , 0 }
+        new int[2]{ 0,-1 },
+        new int[2]{-1, 0 },
+        new int[2]{ 1, 0 },
+        new int[2]{ 0, 0 } 
     };
     public List<GameObject>
         paperObjects;
@@ -69,7 +70,7 @@ public class MazeGen : MonoBehaviour
             refresh = false;
             Reset();
         }
-        if (exitMazePiece != null & !won) {
+        if (exitMazePiece is not null & !won) {
             if (Player.instance.gridIndex.EqualTo(exitMazePiece.gridIndex)) { Win(); }}
     }
     public void Reset()
@@ -77,7 +78,7 @@ public class MazeGen : MonoBehaviour
         ui.instance.uiFadeAlphaSet(1);
         Game.instance.papersCollected = 0;
         MazeGenerate();
-        Player.instance.TeleportInstant(startMazePiece.gridIndex.ToWorldPosition() + new Vector3(5f, 1.15f, 5f),
+        Player.instance.TeleportInstant(startMazePiece.gridIndex.GridIndexToWorldPosition() + new Vector3(5f, 1.15f, 5f),
             new Vector3(0f, startMazePiece.toDirection.ToVector().VectorNormalToCardinal().Euler(), 0f));
         Game.instance.inGame = true;
         Player.instance.PlayerFreeze(false);
@@ -150,7 +151,8 @@ public class MazeGen : MonoBehaviour
                     MazePiece mazePieceNewComponent = new();
                     int[] mazePieceGridIndex = new int[2]{ x, z };
                     mazePieceNewComponent.gridIndex = mazePieceGridIndex;
-                    mazePieceNewComponent.EdgeCheck();
+                    mazePieceNewComponent.toDirection = directions[4];
+                    mazePieceNewComponent.fromDirection = directions[4];
                     mazePieceGrid[index] = mazePieceNewComponent;
                     index++;
                 }
@@ -174,18 +176,34 @@ public class MazeGen : MonoBehaviour
                 mazePieceGrid[i].gridIndex = MazePieceIndexToGridIndex(i);
             }
         }
+        GetEdgePieces();
         GetAdjacentMazePieces();
+    }
+    void GetEdgePieces()
+    {
+        for (int x = 0; x < mazeSizeX; x++)
+        {
+            GridIndexToMazePiece(new int[2]{ x, 0 }).EdgeCheck();
+            GridIndexToMazePiece(new int[2]{ x, mazeSizeZ - 1 }).EdgeCheck();
+        }
+        for (int z = 0; z < mazeSizeZ; z++)
+        {
+            GridIndexToMazePiece(new int[2]{ 0, z }).EdgeCheck();
+            GridIndexToMazePiece(new int[2]{ mazeSizeX - 1, z }).EdgeCheck();
+        }
     }
     void GetAdjacentMazePieces()
     {
         for (int i = 0; i < mazePieceGrid.Length; i++)
         {
-            if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[0]), out MazePiece up))
+            //if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[0]), out MazePiece up))
+            if (TryGetMazePiece(GridIndexExt.Plus(mazePieceGrid[i].gridIndex, directions[0]), out MazePiece up))
             {
                 mazePieceGrid[i].adjacentPieces[0] = up;
                 up.adjacentPieces[1] = mazePieceGrid[i];
             }
-            if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[3]), out MazePiece right))
+            //if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[3]), out MazePiece right))
+            if (TryGetMazePiece(GridIndexExt.Plus(mazePieceGrid[i].gridIndex, directions[3]), out MazePiece right))
             {
                 mazePieceGrid[i].adjacentPieces[3] = right;
                             right.adjacentPieces[2] = mazePieceGrid[i];
@@ -203,7 +221,8 @@ public class MazeGen : MonoBehaviour
         startMazePiece.debug = true;
         mazeCurrentPath[0] = startMazePiece;
         MazePiece currentMazePiece = NextInPath(mazeCurrentPath[0]);
-        startMazePiece.toDirection = currentMazePiece.fromDirection.Negative();
+        //startMazePiece.toDirection = currentMazePiece.fromDirection.Negative();
+        startMazePiece.toDirection = GridIndexExt.Negative(currentMazePiece.fromDirection);
 
         int iterations = 0, iterationInfiniteLoop = mazeSizeCount * 10;
 
@@ -230,14 +249,12 @@ public class MazeGen : MonoBehaviour
         exitMazePiece.debugBoxColor = Color.red;
         exitMazePiece.debug = true;
 
-        int[][] paperPositions = GetPaperPositions(out int count);
-        for (int i = 0; i < count; i++)
-        {
-            GameObject newPaper = Instantiate(paperPrefab);
-            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(newPaper, gameObject.scene);
-            newPaper.transform.position = paperPositions[i].ToWorldPosition() + new Vector3Int(5, 2, 5);
-            paperObjects.Add(newPaper);
-        }
+        //int[][] paperPositions = GetPaperPositions(out int count);
+        GetPaperPositions();
+        // for (int i = 0; i < count; i++)
+        // {
+        //     GridIndexToMazePiece(paperPositions[i]).hasPaper = true;
+        // }
         //Debug.Log("New Maze Complete, Start @ " + startingPiece.gridIndex.ToStringBuilder() + ", Exit @ " + mazeExit.gridIndex.ToStringBuilder());
         return;
     }
@@ -251,11 +268,22 @@ public class MazeGen : MonoBehaviour
         if (iterations > iterationInfiniteLoop) { throw new Exception("Infinite Loop Detected @ Backtrack"); }
 
         // GETS DIRECTIONS THE PATH CAN GO
-        MazePiece nextMazePiece = currentMazePiece.RandomAdjacentPiece(out int[] toDirection);
+        //MazePiece nextMazePiece = currentMazePiece.RandomAdjacentPiece(out int[] toDirection);
+        //currentMazePiece.TryGetRandomAdjacentPiece(ref nextMazePiece, ref toDirection);
         
         // CHECK FOR DEAD END
-        if (nextMazePiece == null)
-        {
+        // if (nextMazePiece is null)
+        // {
+        //     // RECURSIVE BACKTRACKING
+        //     mazeCurrentPath[currentPathIndex] = null;
+        //     currentPathIndex--;
+        //     if (currentPathIndex <= 0) { return mazeCurrentPath[0]; }
+        //     currentMazePiece = mazeCurrentPath[currentPathIndex];
+        //     goto Backtrack;
+        // }
+
+        if (!currentMazePiece.TryGetRandomAdjacentPiece(out MazePiece nextMazePiece, out int[] toDirection))
+        { // uint and nuint
             // RECURSIVE BACKTRACKING
             mazeCurrentPath[currentPathIndex] = null;
             currentPathIndex--;
@@ -266,22 +294,22 @@ public class MazeGen : MonoBehaviour
 
         // OPENS THE PATHWAY BETWEEN THE PIECES
         currentMazePiece.OpenDirection(toDirection);
-        nextMazePiece.OpenDirection(toDirection.Negative());
+        nextMazePiece.OpenDirection(GridIndexExt.Negative(toDirection));
         nextMazePiece.passed = true;
-        nextMazePiece.fromDirection = toDirection.Negative();
+        nextMazePiece.fromDirection = GridIndexExt.Negative(toDirection);
         return nextMazePiece;
     }
-    int[][] GetPaperPositions(out int count)
+    //int[][] GetPaperPositions(out int count)
+    void GetPaperPositions()
     {
         int 
-            index = 0,
+            count = 0,
             paperCount = Math.Max(mazeSizeX, mazeSizeZ) - 2;
-        MazePiece[] 
-            mazePieceGridTemp = new MazePiece[mazePieceGrid.Length];
-        int[][]
-            paperPositions = new int[mazePieceGrid.Length][];
-        Array.Copy(mazePieceGrid, mazePieceGridTemp, mazePieceGrid.Length);
-
+        // MazePiece[] 
+        //     mazePieceGridTemp = new MazePiece[mazePieceGrid.Length];
+        // int[][]
+        //     paperPositions = new int[mazePieceGrid.Length][];
+        //Array.Copy(mazePieceGrid, mazePieceGridTemp, mazePieceGrid.Length);
         
         int iterations = 0, iterationInfiniteLoop = mazeSizeCount * 10;
 
@@ -290,19 +318,23 @@ public class MazeGen : MonoBehaviour
         iterations++;
         if (iterations > iterationInfiniteLoop) { throw new Exception("Infinite Loop Detected @ NextPosition"); }
 
-        int randInt = Game.instance.random.Next(mazePieceGridTemp.Length);
-        if (mazePieceGridTemp[randInt] != null) 
+        //int randInt = Game.instance.random.Next(mazePieceGridTemp.Length);
+        int randInt = Game.instance.random.Next(mazePieceGrid.Length);
+        //if (mazePieceGridTemp[randInt] is not null) 
         {
-            if (mazePieceGridTemp[randInt].WallsActiveIsGrEqTo(1))
+            //if (!mazePieceGridTemp[randInt].hasPaper & mazePieceGridTemp[randInt].WallsActiveIsGrEqTo(1))
+            if (!mazePieceGrid[randInt].hasPaper & mazePieceGrid[randInt].WallsActiveIsGrEqTo(1))
             {
-                paperPositions[index] = mazePieceGridTemp[randInt].gridIndex;
-                mazePieceGridTemp[randInt] = null;
-                index++;
+                // paperPositions[index] = mazePieceGridTemp[randInt].gridIndex;
+                // mazePieceGridTemp[randInt] = null;
+                // index++;
+                mazePieceGrid[randInt].hasPaper = true;
+                count++;
             }
         }
-        if (index < paperCount) { goto NextPosition; }
-        count = index;
-        return paperPositions;
+        if (count < paperCount) { goto NextPosition; }
+        //count = index;
+        //return paperPositions;
     }
     int[] GetExitPiecePosition()
     {
@@ -367,6 +399,7 @@ public class MazeGen : MonoBehaviour
     }
 
 
+    
     /*
     public struct MazeGenJob : IJob
     {
@@ -427,15 +460,16 @@ public class MazeGen : MonoBehaviour
         for (int i = 0; i < mazePiece.walls.Length; i++) { if (mazePiece.walls[i]) { wallsActive++; } }
         return wallsActive >= 3;
     }
-    public static MazePieceStruct RandomAdjacentPiece(this MazePieceStruct mazePiece, out int[] direction)
+    public static MazePieceStruct? RandomAdjacentPiece(this MazePieceStruct mazePiece, out int[] direction)
     {
         MazePieceStruct?[] adjacentPiecesAvailable = new MazePieceStruct?[4];
         int[][] adjacentPiecesAvailableDirections = new int[4][];
         int count = 0;
         for (int i = 0; i < mazePiece.adjacentPieces.Length; i++)
         {
-            if (mazePiece.adjacentPieces[i] == MazePieceStruct.Null()) { continue; }
-            if (!mazePiece.adjacentPieces[i].passed) 
+            if (mazePiece.adjacentPieces[i] is null) { continue; }
+            // if (!mazePiece.adjacentPieces[i]?.passed) 
+            if (mazePiece.adjacentPieces[i] is MazePieceStruct piece && !piece.passed)
             { 
                 adjacentPiecesAvailable[count] = mazePiece.adjacentPieces[i];
                 adjacentPiecesAvailableDirections[count] = MazeGen.directions[i];

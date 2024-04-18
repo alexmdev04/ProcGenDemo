@@ -37,16 +37,11 @@ public class MazeNavMesh : MonoBehaviour
         //     20,
         //     MazeGen.instance.mazePieceSize * ((MazeRenderer.instance.renderDistance * 2) + 1) + 1);
         
-        navMeshSurface.center = new Vector3(
-            (MazeGen.instance.mazeSizeX * MazeGen.instance.mazePieceSize) / 2, 
-            0,
-            (MazeGen.instance.mazeSizeZ * MazeGen.instance.mazePieceSize) / 2);
+        navMeshSurface.center = Player.instance.gridIndex.GridIndexToWorldPosition() + new Vector3(MazeGen.instance.mazePieceSize / 2, 0, MazeGen.instance.mazePieceSize / 2);
 
-        navMeshSurface.size = new (
-            MazeGen.instance.mazeSizeX * MazeGen.instance.mazePieceSize,
-            20,
-            MazeGen.instance.mazeSizeX * MazeGen.instance.mazePieceSize);
-
+        float navMeshSurfaceSize = ((MazeGen.instance.mazePieceSize * MazeRenderer.instance.renderDistance) * 2) + (MazeGen.instance.mazePieceSize / 2);
+        
+        navMeshSurface.size = new(navMeshSurfaceSize, 20, navMeshSurfaceSize);
         navMeshSurface.BuildNavMesh();
         initialBakeComplete = true;
     }

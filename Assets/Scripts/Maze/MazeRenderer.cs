@@ -55,7 +55,7 @@ public class MazeRenderer : MonoBehaviour
             for (int z = start; z >= -start; z--)
             {
                 if (z < -start) { break; }
-                if (MazeGen.instance.TryGetMazePiece(Player.instance.gridIndex.Plus(new int[2]{ x, z }), out MazePiece mazePieceToLoad)) 
+                if (MazeGen.instance.TryGetMazePiece(GridIndexExt.Plus(Player.instance.gridIndex, new int[2]{ x, z }) /* Player.instance.gridIndex.Plus(new int[2]{ x, z })*/, out MazePiece mazePieceToLoad)) 
                 { 
                     mazePiecesToLoad.Add(mazePieceToLoad);
                 }
