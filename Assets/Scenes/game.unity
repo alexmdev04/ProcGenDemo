@@ -678,6 +678,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6d0bf67fb8fa1b48bfbafe9fda49014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lookActive: 0
+  moveActive: 0
   newMovement: 1
   frictionType: 0
   groundedAccelerate: 15
@@ -693,15 +695,15 @@ MonoBehaviour:
   lookSensitivity: {x: 0.2, y: 0.2}
   playerEulerAngles: {x: 0, y: 0}
   movementDirection: {x: 0, y: 0, z: 0}
-  lookActive: 1
-  moveActive: 1
   cameraTransformReadOnly: {fileID: 1485074921}
-  gridPosition: {x: 0, y: 0, z: 0}
+  gridIndex: 0000000000000000
+  facingDirection: 0
+  playerSpeed: 0
   friction: 0.85
   forceToApplyFriction: 0.1
   flatvelMin: 0.1
-  walkSpeed: 3
-  sprintSpeed: 6.5
+  walkSpeed: 4
+  sprintSpeed: 8
   cameraHeight: 0.825
   movementAcceleration: 0.025
   movementDecceleration: 0.01
@@ -713,8 +715,6 @@ MonoBehaviour:
   fakeVelocityDecimals: 4
   playerCapsule: {fileID: 989983975}
   groundedRayOrigin: {fileID: 1407414043}
-  facingDirection: 0
-  playerSpeed: 0
 --- !u!54 &1450932456
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -994,6 +994,10 @@ MonoBehaviour:
   defaultLayer:
     serializedVersion: 2
     m_Bits: 1
+  clock: 0
+  inGame: 0
+  papersCollected: 0
+  playerLives: 0
   globalVolume: {fileID: 1950842493}
 --- !u!23 &3025193578183610954
 MeshRenderer:

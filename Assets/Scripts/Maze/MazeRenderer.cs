@@ -9,15 +9,16 @@ using UnityEngine.SceneManagement;
 public class MazeRenderer : MonoBehaviour
 {
     public static MazeRenderer instance { get; private set; }
-    public bool refresh;
+    public bool 
+        refresh;
     public int 
         extraChecks = 0,
         renderDistance = 3;
-    List<LoadedMazePiece> 
+    public List<LoadedMazePiece> 
         loadedMazePieces = new(),
         mazePiecePool = new();
     Stack<LoadedMazePiece>
-        mazePiecePoolAvailable = new();
+        mazePiecePoolAvailable;
     const string
         str_renderTime = "Update Maze Time = ",
         str_ms = "ms",
@@ -37,7 +38,7 @@ public class MazeRenderer : MonoBehaviour
     public void Reset()
     {
         loadedMazePieces.Clear();
-        ResetPool();
+        //ResetPool();
         SetPoolSize(GetPoolSize());
     }
     public void MazeRenderUpdate()
@@ -79,6 +80,9 @@ public class MazeRenderer : MonoBehaviour
 
         // LOADS MAZE PIECES, CAN INCLUDE ALREADY LOADED PIECES AS THEY WILL BE SKIPPED
         mazePiecesToLoad.ForEach(mazePiece => loadedMazePieces.Add(TakeFromPool(mazePiece)));
+
+        MazeNavMesh.instance.MazeRenderFinished();
+
         timer.Stop();
         //Debug.Log(new StringBuilder(str_renderTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
         //Debug.Break();
@@ -86,7 +90,7 @@ public class MazeRenderer : MonoBehaviour
     public void SetRenderDistance(int renderDistanceNew)
     {
         renderDistance = renderDistanceNew;
-        foreach (MazePiece mazePiece in MazeGen.instance.mazePieceGrid) { mazePiece.loadedMazePiece = null; }
+        //foreach (MazePiece mazePiece in MazeGen.instance.mazePieceGrid) { mazePiece.loadedMazePiece = null; }
         Reset();
         MazeRenderUpdate();
     }
@@ -107,12 +111,16 @@ public class MazeRenderer : MonoBehaviour
                 mazePieceNew.transform.parent = gameObject.transform;
                 mazePiecePool.Add(mazePieceNew.GetComponent<LoadedMazePiece>());    
             }
+            Debug.Log("mazePiecePool +" + amount);
         }
         else if (amount < 0) // SHRINK POOL
         {
+            Debug.Log("mazePiecePool " + amount);
+            throw new NotImplementedException();
             amount = Math.Abs(amount);
-            for (int i = mazePiecePool.Count - 1; i < mazePiecePool.Count + amount; i++) { Destroy(mazePiecePool[i]); }
-            mazePiecePool.RemoveRange(mazePiecePool.Count - amount - 1, amount);
+            for (int i = mazePiecePool.Count - amount; i < mazePiecePool.Count; i++)
+            { loadedMazePieces.Remove(mazePiecePool[i]);  Destroy(mazePiecePool[i].gameObject); }
+            mazePiecePool.RemoveRange(mazePiecePool.Count - amount, amount);
         }
         else { return; }
     }
@@ -123,11 +131,14 @@ public class MazeRenderer : MonoBehaviour
         mazePiecePool.Clear();
         mazePiecePoolAvailable.Clear();
     }
+
+    // ADDING TO THE POOL WILL BE AN IJob, TryPop SHOULD WAIT UNTIL A PIECE IS AVAILABLE
+
     LoadedMazePiece TakeFromPool(MazePiece mazePiece)
     {
         // ASSIGNS A MazePiece TO A LoadedMazePiece FROM THE POOL, TO BE VISIBLE IN THE WORLD
         if (mazePiece.loadedMazePiece != null) { return mazePiece.loadedMazePiece; }
-        if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePieceNew))
+        if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePieceNew)) 
         {
             Debug.LogError("pool exceeded");
             return null;
@@ -154,7 +165,7 @@ public class MazeRenderer : MonoBehaviour
         bool poolSizeExceededMazeSize = false;
         for (int i = 1; i <= renderDistance; i++) 
         { 
-            poolSize += 4 * i;
+            poolSize += 4 * i;  
             poolSizeExceededMazeSize = poolSize > MazeGen.instance.mazeSizeCount;
             if (poolSizeExceededMazeSize) { renderDistance = i + 1; break; }
         }

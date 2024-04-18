@@ -274,7 +274,7 @@ public class Player : MonoBehaviour
     }
     public void SetSprint(bool state) => sprinting = state;
     public void SetCrouch(bool state) => crouched = state;
-    public void PlayerFreeze(bool state) => rb.constraints = state? RigidbodyConstraints.FreezeAll : rbConstraintsDefault;
+    public void PlayerFreeze(bool state) => rb.constraints = state ? RigidbodyConstraints.FreezeAll : RigidbodyConstraints.FreezeRotation;
     public StringBuilder debugGetStats()
     {
         return new StringBuilder(uiDebug.str_playerTitle)

@@ -7,6 +7,7 @@ public class ui : MonoBehaviour
 {
     public static ui instance { get; private set; }
     public uiSettings settings { get; private set; }
+    public uiGameOver gameOver { get; private set; }
     //public List<uiObjective> 
     //    uiObjectives;
     public bool 
@@ -17,7 +18,8 @@ public class ui : MonoBehaviour
     [SerializeField] TextMeshProUGUI 
         uiSpeedometer,
         uiMazeSize,
-        uiPlayerGridPosition;
+        uiPlayerGridPosition,
+        uiPlayerLives;
     [SerializeField] Image 
         uiFade;
     [SerializeField] float 
@@ -32,7 +34,9 @@ public class ui : MonoBehaviour
     {
         instance = this;
         settings = GetComponentInChildren<uiSettings>();
+        gameOver = GetComponentInChildren<uiGameOver>();
         settings.gameObject.SetActive(false);
+        gameOver.gameObject.SetActive(false);
         //LevelLoader.instance.levelLoaded.AddListener(Refresh);
     }
     void Start()
@@ -46,6 +50,7 @@ public class ui : MonoBehaviour
         uiSpeedometerUpdate();
         uiMazeSizeUpdate();
         uiPlayerGridPositionUpdate();
+        uiPlayerLives.text = Game.instance.playerLives.ToString();
     }
     void Pause()
     {

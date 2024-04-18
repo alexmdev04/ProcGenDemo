@@ -412,6 +412,10 @@ public static class Extensions
     public static int[] Divide  (this int[] value1, int[] value2) => new int[2] { value1[0] / value2[0], value1[1] / value2[1] };
     public static int[] Divide  (this int[] value1, int   value2) => new int[2] { value1[0] / value2,    value1[1] / value2    };
     public static Vector3Int ToVector(this int[] value) => new(value[0], 0, value[1]);
+    public static Vector3Int ToVector(this int[] value, int y) => new(value[0], y, value[1]);
+    public static Vector3Int ToVector(this int[] value, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, 0, value[1] * scaleZ);
+    public static Vector3Int ToWorldPosition(this int[] value, int y = 0) => new((value[0]) * MazeGen.instance.mazePieceSize, y, (value[1]) * MazeGen.instance.mazePieceSize);
+    public static Vector3Int ToVector(this int[] value, int y, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, y, value[1] * scaleZ);
     public static int[] ToIndex(this Vector3Int value) => new int[2]{ value.x, value.z };
     public static StringBuilder ToStringBuilder(this int[] value) // this one is tho
     {
@@ -433,5 +437,15 @@ public static class Extensions
             }
         }
         return true;
+    }
+    public static void Add<T>(this T[] array, T value)
+    {
+        Array.Resize<T>(ref array, array.Length + 1);
+        array[^1] = value;
+    }
+    public static void RemoveLast<T>(this T[] array)
+    {
+        array[^1] = default(T);
+        Array.Resize<T>(ref array, array.Length - 1);
     }
 }

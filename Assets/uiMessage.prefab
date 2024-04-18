@@ -54,6 +54,7 @@ MonoBehaviour:
   yPerMsg: 42.5
   animSpeed: 5
   resetTime: 3
+  maxLines: 5
 --- !u!222 &2818154029518636827
 CanvasRenderer:
   m_ObjectHideFlags: 0

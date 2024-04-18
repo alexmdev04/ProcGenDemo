@@ -1,9 +1,8 @@
-using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
-using UnityEditor;
 using System;
+using Unity.Jobs;
 
 [RequireComponent(typeof(MazeRenderer))]
 public class MazeGen : MonoBehaviour
@@ -13,7 +12,9 @@ public class MazeGen : MonoBehaviour
         refresh,
         mazeRenderAuto = true;
     public GameObject
-        mazePiecePrefab;
+        mazePiecePrefab,
+        paperPrefab,
+        enemy;
     public int 
         mazeSizeX = 10,
         mazeSizeZ = 10,
@@ -25,17 +26,24 @@ public class MazeGen : MonoBehaviour
         mazePieceDefault { get; private set; } = new();
     public GameObject
         floor;
-    public int 
-        iterations = 0;
+    public MeshRenderer 
+        floorRenderer;
     int
-        goalMinimumDistanceFromStart;
+        goalMinimumDistanceFromStart,
+        currentPathIndex;
     MazePiece
-        startPiece,
-        exitPiece;
+        startMazePiece,
+        exitMazePiece;
+    // int[]
+    //     startGridIndex,
+    //     exitGridIndex;
     List<int[]> 
         endPieces = new();
-    List<MazePiece> 
-        mazeCurrentPath = new();
+    //List<MazePiece> 
+    MazePiece[] 
+        mazeCurrentPath;
+    public bool 
+        resetOnWin, won;
     public static int[][] directions = new int[4][]
     {
         new int[2]{ 0, 1 },
@@ -43,6 +51,8 @@ public class MazeGen : MonoBehaviour
         new int[2]{ -1 , 0 },
         new int[2]{ 1 , 0 }
     };
+    public List<GameObject>
+        paperObjects;
     const string 
         str_mazeGenTime = "Maze Generation Time = ",
         str_prefabError = "Maze Piece Prefab not assigned, check Assets/Models/",
@@ -50,6 +60,7 @@ public class MazeGen : MonoBehaviour
     void Awake()
     {
         instance = this;
+        floorRenderer = floor.GetComponent<MeshRenderer>();
     }
     void Update()
     {
@@ -58,61 +69,115 @@ public class MazeGen : MonoBehaviour
             refresh = false;
             Reset();
         }
-        if (Player.instance.gridIndex.Equals(exitPiece?.gridIndex)) { Win(); }
+        if (exitMazePiece != null & !won) {
+            if (Player.instance.gridIndex.EqualTo(exitMazePiece.gridIndex)) { Win(); }}
     }
     public void Reset()
     {
         ui.instance.uiFadeAlphaSet(1);
+        Game.instance.papersCollected = 0;
         MazeGenerate();
-        Player.instance.TeleportInstant(startPiece.gridIndex.Multiply(mazePieceSize).ToVector() + new Vector3(5f, 1.15f, 5f),
-            new Vector3(0f, startPiece.toDirection.ToVector().VectorNormalToCardinal().Euler(), 0f));
-        ui.instance.settings.resetMessage.SetActive(false);
+        Player.instance.TeleportInstant(startMazePiece.gridIndex.ToWorldPosition() + new Vector3(5f, 1.15f, 5f),
+            new Vector3(0f, startMazePiece.toDirection.ToVector().VectorNormalToCardinal().Euler(), 0f));
+        Game.instance.inGame = true;
+        Player.instance.PlayerFreeze(false);
+        Player.instance.lookActive = true;
+        Player.instance.moveActive = true;
+        enemy.SetActive(true);
     }
     void MazeGenerate()
     {
         if (mazePiecePrefab == null) { Debug.LogError(str_prefabError); return; }
+        won = false;
 
         System.Diagnostics.Stopwatch timer = new();
         timer.Start();
 
         // TRANSFORMING FLOOR OBJECT
-        floor.transform.localScale = new Vector3(mazeSizeX * 10, 1f, mazeSizeZ * 10);
+        floor.transform.localScale = new Vector3(mazeSizeX * mazePieceSize, 1f, mazeSizeZ * mazePieceSize);
         floor.transform.position = new Vector3(floor.transform.localScale.x / 2, 0.5f, floor.transform.localScale.z / 2);
+        floorRenderer.material.mainTextureScale = new Vector2(mazeSizeX, mazeSizeZ);
 
         goalMinimumDistanceFromStart = Mathf.CeilToInt(mazeSizeCount * 0.75f);
 
         mazeSizeCount = mazeSizeX * mazeSizeZ;
-        MazeGridNew();
-        //MazeGridSet(mazeSizeCount);
+        //MazeGridNew();
+        MazeGridSet(mazeSizeCount);
+        //Debug.Break();
         MazeAlgorithm();
-  
         timer.Stop();
         uiMessage.instance.New(new StringBuilder(str_mazeGenTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
 
         MazeRenderer.instance.Reset();
-        if (startPiece.gridIndex.EqualTo(Player.instance.gridIndex)) { MazeRenderer.instance.MazeRenderUpdate(); }
+        if (startMazePiece.gridIndex.EqualTo(Player.instance.gridIndex)) { MazeRenderer.instance.MazeRenderUpdate(); }
     }
-    void MazeGridNew()
+    // void MazeGridNew()
+    // {
+    //     endPieces.Clear();
+    //     mazePieceGrid = new MazePiece[mazeSizeCount];
+    //     int index = 0;
+    //     // CREATES AN EMPTY GRID
+    //     for (int x = 0; x < mazeSizeX; x++)
+    //     {           
+    //         for (int z = 0; z < mazeSizeZ; z++)
+    //         {
+    //             // CREATES EMPTY MazePiece CLASS AND ADDS IT TO THE DICTIONARY
+    //             MazePiece mazePieceNewComponent = new();
+    //             int[] mazePieceGridIndex = new int[2]{ x, z };
+    //             mazePieceNewComponent.gridIndex = mazePieceGridIndex;
+    //             mazePieceNewComponent.EdgeCheck();
+    //             mazePieceGrid[index] = mazePieceNewComponent;
+    //             index++;
+    //         }
+    //     }
+    //     GetAdjacentMazePieces();
+    // }
+    void MazeGridSet(int amount)
     {
         endPieces.Clear();
-        mazePieceGrid = new MazePiece[mazeSizeCount];
-        int index = 0;
-        // CREATES AN EMPTY GRID
-        for (int x = 0; x < mazeSizeX; x++)
-        {           
-            for (int z = 0; z < mazeSizeZ; z++)
+        for (int i = 0; i < paperObjects.Count; i++) { Destroy(paperObjects[i]); paperObjects.RemoveAt(i); }
+        int oldMazeGridCount = mazePieceGrid.Length;
+        int[] lastPieceGridIndex = mazePieceGrid.Length == 0 ? new int[2] { 0, 0 } : MazePieceIndexToGridIndex(oldMazeGridCount - 1);
+        if (amount > oldMazeGridCount) // EXPAND POOL
+        {
+            Array.Resize(ref mazePieceGrid, amount);
+            int index = Math.Clamp(oldMazeGridCount - 1, 0, int.MaxValue);
+            for (int x = lastPieceGridIndex[0]; x < mazeSizeX; x++)
+            {           
+                for (int z = lastPieceGridIndex[1]; z < mazeSizeZ; z++)
+                {
+                    // CREATES EMPTY MazePiece CLASS AND ADDS IT TO THE DICTIONARY
+                    MazePiece mazePieceNewComponent = new();
+                    int[] mazePieceGridIndex = new int[2]{ x, z };
+                    mazePieceNewComponent.gridIndex = mazePieceGridIndex;
+                    mazePieceNewComponent.EdgeCheck();
+                    mazePieceGrid[index] = mazePieceNewComponent;
+                    index++;
+                }
+            }
+            Debug.Log("mazePieceGrid +" + (amount - oldMazeGridCount));
+        }
+        else if (amount < oldMazeGridCount) // SHRINK POOL
+        {
+            for (int i = amount; i < mazePieceGrid[amount..].Length; i++)
             {
-                // CREATES EMPTY MazePiece CLASS AND ADDS IT TO THE DICTIONARY
-                MazePiece mazePieceNewComponent = new();
-                int[] mazePieceGridIndex = new int[2]{ x, z };
-                mazePieceNewComponent.gridIndex = mazePieceGridIndex;
-                mazePieceNewComponent.EdgeCheck();
-                mazePieceGrid[index] = mazePieceNewComponent;
-                index++;
+                mazePieceGrid[i] = null;
+            }
+            Array.Resize(ref mazePieceGrid, amount);
+            Debug.Log("mazePieceGrid " + (amount - oldMazeGridCount));
+        }
+        else 
+        {
+            for (int i = 0; i < mazePieceGrid.Length; i++)
+            {
+                mazePieceGrid[i].Reset();
+                mazePieceGrid[i].gridIndex = MazePieceIndexToGridIndex(i);
             }
         }
-        // SETS EDGE PIECES AND GETS ADJACENT PIECES
-        // START ADJACENT PIECE CHAIN
+        GetAdjacentMazePieces();
+    }
+    void GetAdjacentMazePieces()
+    {
         for (int i = 0; i < mazePieceGrid.Length; i++)
         {
             if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[0]), out MazePiece up))
@@ -123,104 +188,121 @@ public class MazeGen : MonoBehaviour
             if (TryGetMazePiece(mazePieceGrid[i].gridIndex.Plus(directions[3]), out MazePiece right))
             {
                 mazePieceGrid[i].adjacentPieces[3] = right;
-                right.adjacentPieces[2] = mazePieceGrid[i];
+                            right.adjacentPieces[2] = mazePieceGrid[i];
             }
         }
     }
-    // void MazeGridSet(int amount)
-    // {
-    //     endPieces.Clear();
-    //     bool newMazePieceGrid = mazePieceGrid == null;
-    //     int oldMazeGridCount = newMazePieceGrid ? 0 : mazePieceGrid.Length;
-    //     int[] lastPieceGridIndex = newMazePieceGrid ? new int[2] { 0, 0 } : mazePieceGrid[^1].gridIndex;
-    //     if (amount >= oldMazeGridCount) // EXPAND POOL
-    //     {
-    //         if (newMazePieceGrid)
-    //         {
-    //             mazePieceGrid = new MazePiece[amount];
-    //         }
-    //         Array.Resize(ref mazePieceGrid, amount);
-    //         int index = oldMazeGridCount - 1;
-    //         for (int x = lastPieceGridIndex[0]; x < mazeSizeX; x++)
-    //         {           
-    //             for (int z = lastPieceGridIndex[1]; z < mazeSizeZ; z++)
-    //             {
-    //                 // CREATES EMPTY MazePiece CLASS AND ADDS IT TO THE DICTIONARY
-    //                 MazePiece mazePieceNewComponent = new();
-    //                 int[] mazePieceGridIndex = new int[2]{ x, z };
-    //                 mazePieceNewComponent.gridIndex = mazePieceGridIndex;
-    //                 mazePieceNewComponent.EdgeCheck();
-    //                 mazePieceGrid[index] = mazePieceNewComponent;
-    //                 index++;
-    //             }
-    //         }
-    //     }
-    //     else if (amount < oldMazeGridCount) // SHRINK POOL
-    //     {
-    //         for (int i = 0; i < mazePieceGrid[(amount - 1)..].Length; i++)
-    //         {
-    //             mazePieceGrid[i] = null;
-    //         }
-    //         mazePieceGrid = mazePieceGrid[..(amount - 1)];
-    //     }
-    //     else { return; }
-    // }
     void MazeAlgorithm()
     {
+        mazeCurrentPath = new MazePiece[mazeSizeCount];
+        currentPathIndex = 0;
         // SETS THE START OF THE MAZE
-        startPiece = mazePieceGrid[Game.instance.random.Next(mazeSizeCount)];
-        startPiece.passed = true;
-        startPiece.debugBoxColor = Color.green;
-        startPiece.debug = true;
-        mazeCurrentPath.Add(startPiece);
-        MazePiece currentPiece = NextInPath(startPiece);
-        startPiece.toDirection = currentPiece.fromDirection.Negative();
+        startMazePiece = mazePieceGrid[Game.instance.random.Next(mazeSizeCount)];
+        startMazePiece.passed = true;
+        startMazePiece.debugBoxColor = Color.green;
+        startMazePiece.debug = true;
+        mazeCurrentPath[0] = startMazePiece;
+        MazePiece currentMazePiece = NextInPath(mazeCurrentPath[0]);
+        startMazePiece.toDirection = currentMazePiece.fromDirection.Negative();
 
-        NextPiece:
+        int iterations = 0, iterationInfiniteLoop = mazeSizeCount * 10;
+
+        NextMazePiece:
+
+        iterations++;
+        if (iterations > iterationInfiniteLoop) { throw new Exception("Infinite Loop Detected @ NextMazePiece"); }
+
         // CHECK IF THE ALGORITHM HAS BACK TRACKED TO THE START
-        if (currentPiece != startPiece)
+        if (!currentMazePiece.gridIndex.EqualTo(startMazePiece.gridIndex))
         {
             // NEXT PIECE IN PATH
-            mazeCurrentPath.Add(currentPiece);
-            currentPiece = NextInPath(currentPiece);
-            //if (currentPiece.IsEndPiece()) { endPieces.Add(currentPiece.gridIndex); }
-            goto NextPiece;
+            currentPathIndex++;
+            //mazeCurrentPath.Add(currentPiece);
+            mazeCurrentPath[currentPathIndex] = currentMazePiece;
+            currentMazePiece = NextInPath(currentMazePiece);
+            goto NextMazePiece;
         }
 
         // END OF MAZE GENERATION
-        exitPiece = GridIndexToMazePiece(GetExitPiecePosition());
-        exitPiece.passed = true;
-        exitPiece.debugBoxColor = Color.red;
-        exitPiece.debug = true;
+        //TryGetMazePiece(GetExitPiecePosition(), out exitPiece);
+        exitMazePiece = GridIndexToMazePiece(GetExitPiecePosition());
+        exitMazePiece.passed = true;
+        exitMazePiece.debugBoxColor = Color.red;
+        exitMazePiece.debug = true;
+
+        int[][] paperPositions = GetPaperPositions(out int count);
+        for (int i = 0; i < count; i++)
+        {
+            GameObject newPaper = Instantiate(paperPrefab);
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(newPaper, gameObject.scene);
+            newPaper.transform.position = paperPositions[i].ToWorldPosition() + new Vector3Int(5, 2, 5);
+            paperObjects.Add(newPaper);
+        }
         //Debug.Log("New Maze Complete, Start @ " + startingPiece.gridIndex.ToStringBuilder() + ", Exit @ " + mazeExit.gridIndex.ToStringBuilder());
         return;
     }
-    MazePiece NextInPath(MazePiece currentPiece)
+    MazePiece NextInPath(MazePiece currentMazePiece)
     {
+        int iterations = 0, iterationInfiniteLoop = mazeSizeCount * 10;
+
         Backtrack:
+
+        iterations++;
+        if (iterations > iterationInfiniteLoop) { throw new Exception("Infinite Loop Detected @ Backtrack"); }
+
         // GETS DIRECTIONS THE PATH CAN GO
-        List<int[]> availableDirections = currentPiece.AvailableDirections();
+        MazePiece nextMazePiece = currentMazePiece.RandomAdjacentPiece(out int[] toDirection);
         
         // CHECK FOR DEAD END
-        if (availableDirections.Count == 0)
+        if (nextMazePiece == null)
         {
             // RECURSIVE BACKTRACKING
-            mazeCurrentPath.RemoveAt(mazeCurrentPath.Count - 1);
-            if (mazeCurrentPath.Count == 0) { return currentPiece; }
-            currentPiece = mazeCurrentPath[^1];
+            mazeCurrentPath[currentPathIndex] = null;
+            currentPathIndex--;
+            if (currentPathIndex <= 0) { return mazeCurrentPath[0]; }
+            currentMazePiece = mazeCurrentPath[currentPathIndex];
             goto Backtrack;
         }
 
-        // GOES TO A RANDOM PIECE WITHIN THE AVAILABLE DIRECTIONS
-        int[] randomDirection = availableDirections[Game.instance.random.Next(availableDirections.Count)];
-        MazePiece nextPiece = GridIndexToMazePiece(currentPiece.gridIndex.Plus(randomDirection));
-
         // OPENS THE PATHWAY BETWEEN THE PIECES
-        currentPiece.OpenDirection(randomDirection);
-        nextPiece.OpenDirection(randomDirection.Negative());
-        nextPiece.passed = true;
-        nextPiece.fromDirection = randomDirection.Negative();
-        return nextPiece;
+        currentMazePiece.OpenDirection(toDirection);
+        nextMazePiece.OpenDirection(toDirection.Negative());
+        nextMazePiece.passed = true;
+        nextMazePiece.fromDirection = toDirection.Negative();
+        return nextMazePiece;
+    }
+    int[][] GetPaperPositions(out int count)
+    {
+        int 
+            index = 0,
+            paperCount = Math.Max(mazeSizeX, mazeSizeZ) - 2;
+        MazePiece[] 
+            mazePieceGridTemp = new MazePiece[mazePieceGrid.Length];
+        int[][]
+            paperPositions = new int[mazePieceGrid.Length][];
+        Array.Copy(mazePieceGrid, mazePieceGridTemp, mazePieceGrid.Length);
+
+        
+        int iterations = 0, iterationInfiniteLoop = mazeSizeCount * 10;
+
+        NextPosition:
+
+        iterations++;
+        if (iterations > iterationInfiniteLoop) { throw new Exception("Infinite Loop Detected @ NextPosition"); }
+
+        int randInt = Game.instance.random.Next(mazePieceGridTemp.Length);
+        if (mazePieceGridTemp[randInt] != null) 
+        {
+            if (mazePieceGridTemp[randInt].WallsActiveIsGrEqTo(1))
+            {
+                paperPositions[index] = mazePieceGridTemp[randInt].gridIndex;
+                mazePieceGridTemp[randInt] = null;
+                index++;
+            }
+        }
+        if (index < paperCount) { goto NextPosition; }
+        count = index;
+        return paperPositions;
     }
     int[] GetExitPiecePosition()
     {
@@ -228,30 +310,21 @@ public class MazeGen : MonoBehaviour
 
         for (int i = 0; i < mazePieceGrid.Length; i++)
         {
-            if (mazePieceGrid[i].IsEndPiece()) { endPieces.Add(mazePieceGrid[i].gridIndex); }
+            if (mazePieceGrid[i].WallsActiveIsGrEqTo()) { endPieces.Add(mazePieceGrid[i].gridIndex); }
         }
 
         List<int[]> endPiecesOutsideMinDiff = new(endPieces);
         NewEndPiece:
         for (int i = 0; i < endPiecesOutsideMinDiff.Count; i++)
         {
-            if (Math.Abs(endPiecesOutsideMinDiff[i][0] - startPiece.gridIndex[0]) > minDiff 
-              & Math.Abs(endPiecesOutsideMinDiff[i][1] - startPiece.gridIndex[1]) > minDiff)
+            if (Math.Abs(endPiecesOutsideMinDiff[i][0] - startMazePiece.gridIndex[0]) > minDiff 
+              & Math.Abs(endPiecesOutsideMinDiff[i][1] - startMazePiece.gridIndex[1]) > minDiff)
             {
                 endPiecesOutsideMinDiff.RemoveAt(i);
             }
         }
         
-        // List<int[]> endPiecesOutsideMinDiff = new();
-        // for (int i = 0; i < endPieces.Count; i++)
-        // {
-        //     if (Math.Abs(endPieces[i][0] - startPiece.gridIndex[0]) > minDiff 
-        //       & Math.Abs(endPieces[i][1] - startPiece.gridIndex[1]) > minDiff)
-        //     {
-        //         endPiecesOutsideMinDiff.Add(endPieces[i]);
-        //     }
-        // }
-        if (minDiff <= 0) { Debug.Log("no valid exit position"); return new int[2]{ 0, 0 }; }
+        if (minDiff <= 0) { Debug.LogWarning("no valid exit position"); return new int[2]{ 0, 0 }; }
         if (endPiecesOutsideMinDiff.Count == 0) { minDiff--; goto NewEndPiece; }
         return endPiecesOutsideMinDiff[Game.instance.random.Next(endPiecesOutsideMinDiff.Count)];
     }
@@ -259,14 +332,16 @@ public class MazeGen : MonoBehaviour
     { 
         "If I had a cookie I would not give it to you and pat you on the back instead.",
         "Now go again.",
-        "If you win again you might just go insane!",
-        ""
+        "If you win again you might just go insane!"
     };
     void Win()
     {
+        return;
         uiMessage.instance.New("You Win! " + winMsgs[Game.instance.random.Next(winMsgs.Length)]);
         uiMessage.instance.SetTimer(5f);
-        refresh = true;
+        won = true;
+        if (!resetOnWin) { return; }
+        Reset();
     }
     public bool TryGetMazePiece(int[] gridIndex, out MazePiece mazePiece)
     {
@@ -277,11 +352,129 @@ public class MazeGen : MonoBehaviour
         return true;
     }
     public int GridIndexToMazePieceIndex(int[] gridIndex) => (gridIndex[0] * mazeSizeX) + gridIndex[1];
-    //public int[] MazePieceIndexToGridIndex(int mazePieceIndex) => (gridIndex[0] * mazeSizeX) + gridIndex[1];
+    public int[] MazePieceIndexToGridIndex(int mazePieceIndex) 
+    { 
+        int z = mazePieceIndex % mazeSizeX;
+        int a = mazePieceIndex - z;
+        int x = a < 0 ? 0 : (mazePieceIndex - z) / mazeSizeX;
+        return new int[2] { x, z };
+    }
     public MazePiece GridIndexToMazePiece(int[] gridIndex) 
     {
         int index = GridIndexToMazePieceIndex(gridIndex);
         if (index > mazePieceGrid.Length - 1 | index < 0) { return null; }
         return mazePieceGrid[index];
     }
+
+
+    /*
+    public struct MazeGenJob : IJob
+    {
+        public void Execute()
+        {
+            
+        }
+    }
+    public struct MazePieceStruct
+    {
+        public bool
+            passed,
+            debug;
+        public bool[] 
+            walls;
+        [NonSerialized] public MazePieceStruct?[]
+            adjacentPieces;
+        public int[] 
+            gridIndex,
+            fromDirection,
+            toDirection;
+        public Color? 
+            debugBoxColor;
+        public LoadedMazePiece
+            loadedMazePiece;
+
+        public MazePieceStruct(int[] gridIndex_)
+        {
+            passed = false;
+            debug = false;
+            walls = new bool[4]{ true, true, true, true };
+            adjacentPieces = new MazePieceStruct?[4];
+            gridIndex = gridIndex_;
+            fromDirection = new int[2]{ 0, 0 };
+            toDirection = new int[2]{ 0, 0 };
+            debugBoxColor = Color.clear;
+            loadedMazePiece = null;
+        }
+        public static MazePieceStruct? Null()
+        {
+            return new MazePieceStruct
+            {
+                passed = false,
+                debug = false,
+                walls = null,
+                adjacentPieces = null,
+                gridIndex = null,
+                fromDirection = null,
+                toDirection = null,
+                debugBoxColor = null,
+                loadedMazePiece = null
+            };
+        }
+    }
+    public static bool IsEndPiece(this MazePieceStruct mazePiece) 
+    { 
+        int wallsActive = 0;
+        for (int i = 0; i < mazePiece.walls.Length; i++) { if (mazePiece.walls[i]) { wallsActive++; } }
+        return wallsActive >= 3;
+    }
+    public static MazePieceStruct RandomAdjacentPiece(this MazePieceStruct mazePiece, out int[] direction)
+    {
+        MazePieceStruct?[] adjacentPiecesAvailable = new MazePieceStruct?[4];
+        int[][] adjacentPiecesAvailableDirections = new int[4][];
+        int count = 0;
+        for (int i = 0; i < mazePiece.adjacentPieces.Length; i++)
+        {
+            if (mazePiece.adjacentPieces[i] == MazePieceStruct.Null()) { continue; }
+            if (!mazePiece.adjacentPieces[i].passed) 
+            { 
+                adjacentPiecesAvailable[count] = mazePiece.adjacentPieces[i];
+                adjacentPiecesAvailableDirections[count] = MazeGen.directions[i];
+                count++;
+            }
+        }
+        if (count == 0)
+        {
+            direction = new int[2]{ 0, 0 };
+            return null;
+        }
+        int randomInt = Game.instance.random.Next(count);
+        direction = adjacentPiecesAvailableDirections[randomInt];
+        return adjacentPiecesAvailable[randomInt];
+    }
+    public static void OpenDirection(this MazePieceStruct mazePiece, int[] direction)
+    {
+        for (int i = 0; i < MazeGen.directions.Length; i++)
+        {
+            mazePiece.walls[i] = (direction[0] != MazeGen.directions[i][0] | direction[1] != MazeGen.directions[i][1]) & mazePiece.walls[i];
+        }
+    }
+    public static void EdgeCheck(this MazePieceStruct mazePiece)
+    {
+        mazePiece.walls[0] |= mazePiece.gridIndex[1] == MazeGen.instance.mazeSizeZ - 1;
+        mazePiece.walls[1] |= mazePiece.gridIndex[1] == 0;
+        mazePiece.walls[2] |= mazePiece.gridIndex[0] == 0;
+        mazePiece.walls[3] |= mazePiece.gridIndex[0] == MazeGen.instance.mazeSizeZ - 1;
+    }
+    public static void Reset(this MazePieceStruct mazePiece)
+    {
+        mazePiece.passed = false;
+        mazePiece.debug = false;
+        mazePiece.walls = new bool[4]{ true, true, true, true };
+        mazePiece.adjacentPieces = new MazePieceStruct?[4];
+        mazePiece.gridIndex = null;
+        mazePiece.fromDirection = new int[2]{ 0, 0 };
+        mazePiece.toDirection = new int[2]{ 0, 0 };
+        mazePiece.debugBoxColor = Color.clear;
+        mazePiece.loadedMazePiece = null;
+    }*/
 }

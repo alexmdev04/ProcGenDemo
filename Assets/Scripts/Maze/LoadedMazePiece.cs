@@ -16,7 +16,7 @@ public class LoadedMazePiece : MonoBehaviour
         str_mazePiece = "mazePiece ";
     public void Refresh()
     {
-        gameObject.transform.position = mazePiece.gridIndex.Multiply(MazeGen.instance.mazePieceSize).ToVector();
+        gameObject.transform.position = mazePiece.gridIndex.ToWorldPosition();
         name = new StringBuilder(str_mazePiece).Append(mazePiece.gridIndex.ToStringBuilder()).ToString();
         wallFwd.SetActive(mazePiece.walls[0]);
         wallBack.SetActive(mazePiece.walls[1]);

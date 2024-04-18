@@ -94,7 +94,7 @@ public class uiDebugConsole : MonoBehaviour
         gameObject.SetActive(false);
         defaultProfile = Game.instance.globalVolume.profile;
     }
-    void Start()
+    public void Start()
     {
         // to add a new command, just duplicate a command below and replace the string with the 
         commands = new()
@@ -114,7 +114,9 @@ public class uiDebugConsole : MonoBehaviour
             { "dev", dev },
             { "renderdistance", renderdistance },
             { "rd", renderdistance },
-            { "reset", MazeGen.instance.Reset }
+            { "reset", MazeGen.instance.Reset },
+            { "collectpage", Game.instance.collectPage },
+            { "kill", Game.instance.Kill }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();
@@ -136,24 +138,19 @@ public class uiDebugConsole : MonoBehaviour
     }
     void Command(string input)
     {
-        string outputMsg = string.Empty;
         previousInputs.Insert(1, input);
         string[] parsedInput = ParseInput(input);
 
         //typeof(uiDebugConsole).GetMethod(parsedInput[0]).Invoke(instance, null);
-
+        
+        consoleInput = parsedInput;
         if (commands.TryGetValue(parsedInput[0].ToLower(), out Action action))
         {
-            consoleInput = parsedInput;
             action();
         }
         else { InvalidCommand(); }
         inputField.text = "";
-        if (outputMsg != string.Empty)
-        {
-            uiMessage.instance.New(outputMsg, uiDebug.str_uiDebugConsole);
-            if (uiDebug.instance.debugMode) { Debug.Log(outputMsg); }
-        }
+
         gameObject.SetActive(false);
         if (outputCommandInputs) { logConsoleInputs(); }
     }
@@ -185,7 +182,7 @@ public class uiDebugConsole : MonoBehaviour
                 returnInput.Add(new string(chars[(spaceIndexes[i] + 1)..spaceIndexes[i + 1]]));
             }
         }
-        consoleInput = returnInput.ToArray();
+        //consoleInput = returnInput.ToArray();
 
         return returnInput.ToArray();
     }
@@ -233,9 +230,9 @@ public class uiDebugConsole : MonoBehaviour
             inputField.MoveTextEnd(false);
         }
     }
-    public void InvalidCommand(string commandOverride = default)
+    public void InvalidCommand(string commandOverride = "")
     {
-        string commandOutput = commandOverride == default ? consoleInput[0] : commandOverride;
+        string commandOutput = commandOverride == "" ? consoleInput[0] : commandOverride;
         uiMessage.instance.New("Invalid Command: " + commandOutput, uiDebug.str_uiDebugConsole);
     }
     public void InvalidInput(string dataOverride = default, string commandOverride = default)

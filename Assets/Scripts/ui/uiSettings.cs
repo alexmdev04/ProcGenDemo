@@ -15,10 +15,7 @@ public class uiSettings : MonoBehaviour
     void OnEnable()
     {
         if (!skipOnEnable) { skipOnEnable = true; return; }
-        InputHandler.instance.SetActive(false);
-        Time.timeScale = 0f;
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        Game.instance.Pause(true);
         sensitivityInputField.text = Player.instance.lookSensitivity.y.ToString();
         renderDistanceInputField.text = MazeRenderer.instance.renderDistance.ToString();
         mazeSizeXInputField.text = MazeGen.instance.mazeSizeX.ToString();
@@ -26,10 +23,7 @@ public class uiSettings : MonoBehaviour
     }
     void OnDisable()
     {
-        InputHandler.instance.SetActive(true);
-        Time.timeScale = 1f;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        Game.instance.Pause(false);
     }
     public void Quit()
     {
@@ -38,7 +32,6 @@ public class uiSettings : MonoBehaviour
     public void Resume()
     {
         gameObject.SetActive(false);
-    
     }
     public void Reset()
     {

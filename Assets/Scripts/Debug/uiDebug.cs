@@ -94,6 +94,7 @@ public class uiDebug : MonoBehaviour
     }
     void Start()
     {
+        uiDebugConsole.instance.Start();
         StartRepeating();
         InvokeRepeating(nameof(GetFPS), 0f, statsRepeatRate);
     }
