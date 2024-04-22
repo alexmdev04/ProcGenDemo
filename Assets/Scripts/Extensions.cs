@@ -421,12 +421,13 @@ public static class GridIndexExt
         str_leftBracket = "(",
         str_rightBracket = ")";
 
-    //public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
-    //public static int[] Plus    (this int[] value1, int   value2) => new int[2] { value1[0] + value2,    value1[1] + value2    };
-    public static void  Plus    (ref int[] value1, ref int[] value2) { value1[0] += value2[0]; value1[1] += value2[1]; }
-    public static int[] Plus    (int[] value1, int[] value2) { return new int[2]{ value1[0] + value2[0], value1[1] + value2[1] }; }
-    public static void  Plus    (ref int[] value1, ref int value2) { value1[0] += value2; value1[1] += value2; }
-    public static int[] Plus    (int[] value1, int value2) { value1[0] += value2; value1[1] += value2; return value1; }
+    public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
+    public static int[] Plus    (this int[] value1, int   value2) => new int[2] { value1[0] + value2,    value1[1] + value2    };
+    //public static void  Plus    (ref int[] value1, ref int[] value2) { value1[0] += value2[0]; value1[1] += value2[1]; }
+    //public static int[] Plus    (int[] value1, int[] value2) { return new int[2]{ value1[0] + value2[0], value1[1] + value2[1] }; }
+    //public static void  Plus    (ref int[] value1, ref int value2) { value1[0] += value2; value1[1] += value2; }
+    //public static int[] Plus    (int[] value1, int value2) { value1[0] += value2; value1[1] += value2; return value1; }
+    
     // public static int[] Subtract(this int[] value1, int[] value2) => new int[2] { value1[0] - value2[0], value1[1] - value2[1] };
     // public static int[] Subtract(this int[] value1, int   value2) => new int[2] { value1[0] - value2,    value1[1] - value2    };
     public static void  Subtract(ref int[] value1, ref int[] value2) { value1[0] -= value2[0]; value1[1] -= value2[1]; }
@@ -439,8 +440,9 @@ public static class GridIndexExt
     // public static int[] Divide  (this int[] value1, int   value2) => new int[2] { value1[0] / value2,    value1[1] / value2    };
     public static void  Divide  (ref int[] value1, ref int[] value2) { value1[0] /= value2[0]; value1[1] /= value2[1]; }
     public static void  Divide  (ref int[] value1, ref int   value2) { value1[0] /= value2; value1[1] /= value2; }
-    public static void  Negative(ref int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; }
-    public static int[] Negative(int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; return value; }
+    //public static void  Negative(ref int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; }
+    //public static int[] Negative(int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; return value; }
+    public static int[] Negative(this int[] value) => new int[2] { -value[0], -value[1] };
 
     public static Vector3Int ToVector(this int[] value) => new(value[0], 0, value[1]);
     public static Vector3Int ToVector(this int[] value, int y) => new(value[0], y, value[1]);

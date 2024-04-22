@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 0
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: baa2d8452db767043910c34456940794, type: 2}
   m_HaloStrength: 0
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -588,9 +588,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cameraHeight: 0.825
   walkingAnimEnable: 1
-  walkingAnimSpeedMultiplier: 1
+  walkingAnimSpeedMultiplier: 0.9
   walkingAnimVectorExponent: 0.5
-  walkingAnimSpeedExponent: 1
+  walkingAnimSpeedExponent: 0.9
   walkingAnimDelay: 0
   walkingAnimGraph: {x: 0, y: 0}
   walkingAnimGraphMultiplier: {x: 1, y: 1}
@@ -687,7 +687,7 @@ MonoBehaviour:
   acceleration: 100
   maxVelocityGrounded: 6.5
   maxVelocityAir: 6.5
-  friction1: 0.7
+  friction1: 0.82
   friction2: 1
   moveFixedUpdate: 1
   mouseDelta: {x: 0, y: 0}
@@ -702,8 +702,8 @@ MonoBehaviour:
   friction: 0.85
   forceToApplyFriction: 0.1
   flatvelMin: 0.1
-  walkSpeed: 4
-  sprintSpeed: 8
+  walkSpeed: 5
+  sprintSpeed: 11
   cameraHeight: 0.825
   movementAcceleration: 0.025
   movementDecceleration: 0.01
@@ -954,7 +954,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1950842491}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
@@ -996,9 +996,17 @@ MonoBehaviour:
     m_Bits: 1
   clock: 0
   inGame: 0
+  paused: 0
   papersCollected: 0
-  playerLives: 0
+  paperCount: 0
+  playerHits: 3
+  playerHitsTaken: 0
+  damageVignetteIntensityMin: 0.25
+  damageVignetteIntensityMax: 1
+  filmGrainIntensityDistance: 20
   globalVolume: {fileID: 1950842493}
+  filmGrain: {fileID: 0}
+  vignette: {fileID: 0}
 --- !u!23 &3025193578183610954
 MeshRenderer:
   m_ObjectHideFlags: 0

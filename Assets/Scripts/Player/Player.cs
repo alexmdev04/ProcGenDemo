@@ -272,7 +272,11 @@ public class Player : MonoBehaviour
         playerEulerAngles.y = yAngle;
         //Debug.Log("teleported to; pos: " + worldSpacePosition + ", inrot: " + worldSpaceEulerAngles + ", outrot: " + playerEulerAngles);
     }
-    public void SetSprint(bool state) => sprinting = state;
+    public void SetSprint(bool state) 
+    {
+        if (!state & movementDirection != Vector3.zero) { return; }
+        sprinting = state;
+    }
     public void SetCrouch(bool state) => crouched = state;
     public void PlayerFreeze(bool state) => rb.constraints = state ? RigidbodyConstraints.FreezeAll : RigidbodyConstraints.FreezeRotation;
     public StringBuilder debugGetStats()
@@ -290,13 +294,7 @@ public class Player : MonoBehaviour
             //.Append("\nforce = ").Append(debugForce.Round(4).ToStringBuilder()).Append(", magnitude = ").Append(MathF.Round(debugForce.magnitude, 4))
             //.Append("\nflatvel = ").Append(debugFlatvel.Round(4).ToStringBuilder()).Append(", magnitude = ").Append(MathF.Round(debugFlatvel.magnitude, 4))
             .Append("\nvelocity = ").Append(rb.velocity.Round(4).ToStringBuilder())
-            .Append("\nvelocity = ").Append(playerCapsule.transform.InverseTransformDirection(rb.velocity).Round(4).ToStringBuilder())
-            .Append("\nspeed = ").Append(playerSpeed.ToString()).Append("m/s\n")
-            .Append("\nmDLocal*VelLocal = ").Append(playerCapsule.transform.InverseTransformDirection(movementDirection).Multiply(playerCapsule.transform.InverseTransformDirection(rb.velocity)).Round(4).ToStringBuilder())
-            .Append("\nmdGlobal*VelGlobal = ").Append(movementDirection.Multiply(rb.velocity).Round(4).ToStringBuilder())
-            .Append("\nmdLocal*VelGlobal = ").Append(playerCapsule.transform.InverseTransformDirection(movementDirection).Multiply(rb.velocity).Round(4).ToStringBuilder())
-            .Append("\nmdGlobal*VelLocal = ").Append(movementDirection.Multiply(playerCapsule.transform.InverseTransformDirection(rb.velocity)).Round(4).ToStringBuilder())
-            .Append("\nmax(xVel, zVel) = ").Append(MathF.Round(MathF.Max(MathF.Abs(rb.velocity.x), MathF.Abs(rb.velocity.x)), 4));
+            .Append("\nspeed = ").Append(playerSpeed.ToString()).Append("m/s\n");
             //.Append("\n playerDirection = ").Append(facingDirection).Append(" = ").Append(facingDirection.Euler());
     }
 }   

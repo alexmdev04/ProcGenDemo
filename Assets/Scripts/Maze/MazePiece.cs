@@ -15,9 +15,9 @@ public class MazePiece
         adjacentPieces = new MazePiece[4];
     //public string[] adjacentPieceIndexes = new string[4];
     public int[] 
-        gridIndex = null,
-        fromDirection = null,//new int[2]{ 0, 0 },
-        toDirection = null;//new int[2]{ 0, 0 };
+        gridIndex = null;
+        //fromDirection = new int[2]{ 0, 0 },
+        //toDirection = new int[2]{ 0, 0 };
     public Color 
         debugBoxColor = default;
     public LoadedMazePiece
@@ -39,11 +39,12 @@ public class MazePiece
     {
         passed = false;
         debug = false;
+        hasPaper = false;
         walls = new bool[4]{ true, true, true, true };
         adjacentPieces = new MazePiece[4];
         gridIndex = null;
-        fromDirection = new int[2]{ 0, 0 };
-        toDirection = new int[2]{ 0, 0 };
+        //fromDirection = new int[2]{ 0, 0 };
+        //toDirection = new int[2]{ 0, 0 };
         debugBoxColor = Color.clear;
         loadedMazePiece = null;
     }
@@ -56,12 +57,23 @@ public class MazePiece
     }
     public void OpenDirection(int[] direction)
     {
-        if (direction == MazeGen.directions[4]) { return; }
+        if (direction == null) { return; }
         for (int i = 0; i < walls.Length; i++)
         {
-            walls[i] = (direction[0] != MazeGen.directions[i][0] | direction[1] != MazeGen.directions[i][1]) & walls[i];
+            //walls[i] = (direction[0] != MazeGen.directions[i][0] | direction[1] != MazeGen.directions[i][1]) & walls[i];
+            walls[i] = direction.EqualTo(MazeGen.directions[i]) ? false : walls[i];
         }
     }
+    // public List<int[]> AvailableDirections()
+    // {
+    //     List<int[]> availableDirections = new();
+    //     for (int i = 0; i < adjacentPieces.Length; i++)
+    //     {
+    //         if (adjacentPieces[i] == null) { continue; }
+    //         if (!adjacentPieces[i].passed) { availableDirections.Add(MazeGen.directions[i]); }
+    //     }
+    //     return availableDirections;
+    // }
     // public int[][] AvailableDirections()
     // {
     //     int[][] availableDirections = new int[4][];
@@ -116,13 +128,13 @@ public class MazePiece
         for (int i = 0; i < adjacentPieces.Length; i++)
         {
             randomInt = Game.instance.random.Next(adjacentPieces.Length);
-            if (adjacentPieces[randomInt] is null) { continue; }
+            if (adjacentPieces[randomInt] == null) { continue; }
             if (adjacentPieces[randomInt].passed) { continue; }
             mazePiece = adjacentPieces[randomInt];
             direction = MazeGen.directions[randomInt];
             return true;
         }
-        direction = MazeGen.directions[4];
+        direction = null;
         return false;
     }
     public bool WallsActiveIsGrEqTo(int count = 3) 
@@ -130,5 +142,11 @@ public class MazePiece
         int wallsActive = 0;
         for (int i = 0; i < walls.Length; i++) { if (walls[i]) { wallsActive++; } }
         return wallsActive >= count;
+    }
+    public bool WallsActiveIsEqTo(int count = 3) 
+    { 
+        int wallsActive = 0;
+        for (int i = 0; i < walls.Length; i++) { if (walls[i]) { wallsActive++; } }
+        return wallsActive == count;
     }
 }

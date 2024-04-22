@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7633600130567042460}
   - component: {fileID: 798312904160276359}
   - component: {fileID: 5087513267219728646}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   - component: {fileID: 5089514679060992375}
   - component: {fileID: 2058991316558749626}
   - component: {fileID: 5280362801780045579}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cube (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 7582221437887130179}
   - component: {fileID: 3202376547545742676}
   - component: {fileID: 7758385918913323751}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cube (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -371,7 +371,7 @@ MonoBehaviour:
     hasPaper: 0
     walls: 
     gridIndex: 0000000000000000
-    fromDirection: 000000000000000000000000
+    fromDirection: 0000000000000000
     toDirection: 0000000000000000
     debugBoxColor: {r: 1, g: 0, b: 0, a: 1}
     loadedMazePiece: {fileID: 0}
@@ -380,7 +380,7 @@ MonoBehaviour:
   wallBack: {fileID: 7530314684126693776}
   wallLeft: {fileID: 3363012505402741333}
   wallRight: {fileID: 3753692841959320769}
-  paper: {fileID: 4278719224162768560}
+  paper: {fileID: 2988450159523484767}
 --- !u!1 &3489324339130444066
 GameObject:
   m_ObjectHideFlags: 0
@@ -393,7 +393,7 @@ GameObject:
   - component: {fileID: 5818134394475855595}
   - component: {fileID: 3117948949890502948}
   - component: {fileID: 4884842165665909989}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Cube (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -495,7 +495,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3296714982153968601}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: debugArrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -877,7 +877,7 @@ PrefabInstance:
     - target: {fileID: 1642879977419411039, guid: afb083bcd4cf1e348a2234f15e7774c3,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1642879977419411039, guid: afb083bcd4cf1e348a2234f15e7774c3,
         type: 3}
@@ -924,17 +924,28 @@ PrefabInstance:
       propertyPath: m_Name
       value: paperPrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 6092264030219138009, guid: afb083bcd4cf1e348a2234f15e7774c3,
+        type: 3}
+      propertyPath: loadedMazePiece
+      value: 
+      objectReference: {fileID: 6612553645338531377}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: afb083bcd4cf1e348a2234f15e7774c3, type: 3}
---- !u!1 &4278719224162768560 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5085718722691854646, guid: afb083bcd4cf1e348a2234f15e7774c3,
+--- !u!114 &2988450159523484767 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6092264030219138009, guid: afb083bcd4cf1e348a2234f15e7774c3,
     type: 3}
   m_PrefabInstance: {fileID: 9076171951411734406}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98c0907b1d46dd04e8eff929e1e48d4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &7726387985539475929 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1642879977419411039, guid: afb083bcd4cf1e348a2234f15e7774c3,

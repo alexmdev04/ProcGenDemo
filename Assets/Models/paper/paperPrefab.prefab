@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8343193842305901310}
   - component: {fileID: 1356615562994226791}
   - component: {fileID: 946221994795544044}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: count
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -182,10 +182,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1828720704517834643, guid: 0ad01a719fb8d144a8b4338ad3956190,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 4049763120077078013, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_Name
       value: paperPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 4049763120077078013, guid: 0ad01a719fb8d144a8b4338ad3956190,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4049763120077078013, guid: 0ad01a719fb8d144a8b4338ad3956190,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
@@ -205,17 +220,17 @@ PrefabInstance:
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
@@ -225,17 +240,17 @@ PrefabInstance:
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7524127947035083412, guid: 0ad01a719fb8d144a8b4338ad3956190,
         type: 3}
@@ -300,7 +315,7 @@ MonoBehaviour:
   bobSpeed: 5
   bobAmplitude: 0.25
   count: {fileID: 946221994795544044}
-  gridIndex: 
+  loadedMazePiece: {fileID: 0}
 --- !u!65 &6206846060341099302
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -129,7 +129,7 @@ public class uiDebug : MonoBehaviour
         if (debugMode & !uiDebugConsole.instance.gameObject.activeSelf) { Controls(); }
         /* toggles debug console -> */ if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.Tilde)) { uiDebugConsole.instance.gameObject.SetActive(!uiDebugConsole.instance.gameObject.activeSelf); }
         Noclip();
-        Player.instance.moveActive = !noclipEnabled;
+        //Player.instance.moveActive = !noclipEnabled;
         TorchSwayDebug();
     }
     void GetRes() // gets the current resolution, refresh rate and aspect ratio

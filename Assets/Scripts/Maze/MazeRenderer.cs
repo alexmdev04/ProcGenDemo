@@ -10,7 +10,8 @@ public class MazeRenderer : MonoBehaviour
 {
     public static MazeRenderer instance { get; private set; }
     public bool 
-        refresh;
+        refresh,
+        initialRenderComplete;
     public int 
         extraChecks = 0,
         renderDistance = 3;
@@ -37,7 +38,9 @@ public class MazeRenderer : MonoBehaviour
     }
     public void Reset()
     {
+        for (int i = 0; i < loadedMazePieces.Count; i++) { ReturnToPool(loadedMazePieces[i]); }
         loadedMazePieces.Clear();
+        initialRenderComplete = false;
         //ResetPool();
         SetPoolSize(GetPoolSize());
     }
@@ -81,7 +84,8 @@ public class MazeRenderer : MonoBehaviour
         // LOADS MAZE PIECES, CAN INCLUDE ALREADY LOADED PIECES AS THEY WILL BE SKIPPED
         mazePiecesToLoad.ForEach(mazePiece => loadedMazePieces.Add(TakeFromPool(mazePiece)));
 
-        MazeNavMesh.instance.MazeRenderFinished();
+        MazeNavMesh.instance.Bake();
+        if (!initialRenderComplete) { Enemy.instance.RandomPosition(); initialRenderComplete = true; };
 
         timer.Stop();
         //Debug.Log(new StringBuilder(str_renderTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
@@ -90,7 +94,6 @@ public class MazeRenderer : MonoBehaviour
     public void SetRenderDistance(int renderDistanceNew)
     {
         renderDistance = renderDistanceNew;
-        //foreach (MazePiece mazePiece in MazeGen.instance.mazePieceGrid) { mazePiece.loadedMazePiece = null; }
         Reset();
         MazeRenderUpdate();
     }
@@ -116,10 +119,9 @@ public class MazeRenderer : MonoBehaviour
         else if (amount < 0) // SHRINK POOL
         {
             Debug.Log("mazePiecePool " + amount);
-            throw new NotImplementedException();
             amount = Math.Abs(amount);
             for (int i = mazePiecePool.Count - amount; i < mazePiecePool.Count; i++)
-            { loadedMazePieces.Remove(mazePiecePool[i]);  Destroy(mazePiecePool[i].gameObject); }
+            { Destroy(mazePiecePool[i].gameObject); }
             mazePiecePool.RemoveRange(mazePiecePool.Count - amount, amount);
         }
         else { return; }

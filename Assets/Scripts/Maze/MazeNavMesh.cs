@@ -22,24 +22,13 @@ public class MazeNavMesh : MonoBehaviour
         
     }
     void Update()
-    {
-        // navMeshSurface.center = Player.instance.gridIndex.ToWorldPosition();
-        // navMeshSurface.size = new (
-        //     (MazeRenderer.instance.renderDistance * 2 * MazeGen.instance.mazePieceSize) + MazeGen.instance.mazePieceSize,
-        //     20,
-        //     (MazeRenderer.instance.renderDistance * 2 * MazeGen.instance.mazePieceSize) + MazeGen.instance.mazePieceSize);
+    {     
+        navMeshSurface.center = Player.instance.gridIndex.GridIndexToWorldPosition() 
+            + new Vector3(MazeGen.instance.mazePieceSize / 2, 0, MazeGen.instance.mazePieceSize / 2);
     }
-    public void MazeRenderFinished()
-    {
-        // navMeshSurface.center = Player.instance.gridIndex.ToWorldPosition() + new Vector3Int(5, 0, 5);
-        // navMeshSurface.size = new (
-        //     MazeGen.instance.mazePieceSize * ((MazeRenderer.instance.renderDistance * 2) + 1) + 1,
-        //     20,
-        //     MazeGen.instance.mazePieceSize * ((MazeRenderer.instance.renderDistance * 2) + 1) + 1);
-        
-        navMeshSurface.center = Player.instance.gridIndex.GridIndexToWorldPosition() + new Vector3(MazeGen.instance.mazePieceSize / 2, 0, MazeGen.instance.mazePieceSize / 2);
-
-        float navMeshSurfaceSize = ((MazeGen.instance.mazePieceSize * MazeRenderer.instance.renderDistance) * 2) + (MazeGen.instance.mazePieceSize / 2);
+    public void Bake()
+    {      
+        float navMeshSurfaceSize = (MazeGen.instance.mazePieceSize * MazeRenderer.instance.renderDistance * 2) + (MazeGen.instance.mazePieceSize / 2);
         
         navMeshSurface.size = new(navMeshSurfaceSize, 20, navMeshSurfaceSize);
         navMeshSurface.BuildNavMesh();

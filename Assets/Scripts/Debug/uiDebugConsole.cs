@@ -45,13 +45,24 @@ public class uiDebugConsole : MonoBehaviour
     }
     void vsync()
     {
-        QualitySettings.vSyncCount = QualitySettings.vSyncCount == 0 ? 1 : 0;
+        bool vSyncEnabled = QualitySettings.vSyncCount == 1;
+        QualitySettings.vSyncCount = vSyncEnabled ? 0 : 1;
+        uiMessage.instance.New("vSync " + (vSyncEnabled ? "disabled" : "enabled"));
     }
-    void fov() { }
-    void torch() { }
-    void quit() { }
-    void gfx() { }
-    void debugUpdateRate() { }
+    void fov() 
+    {   
+        if (consoleInput.Length > 1)
+        {
+            if (int.TryParse(consoleInput[1], out int value))
+            {
+                CameraHandler.mainCamera.fieldOfView = 
+                    Extensions.FOVHorizontalToVertical(value, CameraHandler.mainCamera);
+            }
+        }
+        else { InvalidInput(); }
+    }
+    void quit() { Application.Quit(); }
+    void debugUpdateRate() {  }
     void interact()
     {
         if (consoleInput.Length > 1)
@@ -72,9 +83,6 @@ public class uiDebugConsole : MonoBehaviour
         uiMessage.instance.New("Welcome back, Mr. McQueen");
         ui.instance.ToggleSpeedometer();
     }
-    void dev() { }
-    void menu() { }
-    void player() { }
     void renderdistance()
     {
         if (int.TryParse(consoleInput[1], out int renderDistance))
@@ -101,22 +109,18 @@ public class uiDebugConsole : MonoBehaviour
         {
             { "ping", ping },
             { "noclip", noclip },
-            { "god", god },
+            { "god", god }, { "godmode", god },
             { "fps", fps },
             { "vsync", vsync },
             { "fov", fov },
-            { "torch", torch },
-            { "quit", quit },
-            { "gfx", gfx },
+            { "quit", quit }, { "exit", quit },
             { "debugupdaterate", debugUpdateRate },
             { "interact", interact },
             { "iamspeed", ToggleSpeedometer },
-            { "dev", dev },
-            { "renderdistance", renderdistance },
-            { "rd", renderdistance },
-            { "reset", MazeGen.instance.Reset },
-            { "collectpage", Game.instance.collectPage },
-            { "kill", Game.instance.Kill }
+            { "renderdistance", renderdistance }, { "rd", renderdistance },
+            { "reset", MazeGen.instance.Reset }, { "restart", MazeGen.instance.Reset },
+            { "collectpage", Game.instance.CollectPage },
+            { "attack", Game.instance.AttackPlayer }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();
@@ -125,10 +129,7 @@ public class uiDebugConsole : MonoBehaviour
     {
         inputField.ActivateInputField();
         PreviousInput();
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            AutoFill();
-        }
+        //if (Input.GetKeyDown(KeyCode.Tab)) { AutoFill(); }
     }
     void OnDisable()
     {

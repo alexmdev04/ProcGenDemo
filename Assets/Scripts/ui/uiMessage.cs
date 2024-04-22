@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 
 [RequireComponent(typeof(RectTransform))]
@@ -51,10 +52,10 @@ public class uiMessage : MonoBehaviour
         // depending on the current number of messages,
         // the text box lerps up to make it look like the message is sliding up onto the screen
         targetYPos = validMessageCount * yPerMsg;
-        textBox.margin = new(0, Mathf.Lerp(textBox.margin.y, -targetYPos, animSpeed * Time.deltaTime), 0, 0);
+        textBox.margin = new(0, Mathf.Lerp(textBox.margin.y, -targetYPos, animSpeed * Time.unscaledDeltaTime), 0, 0);
 
         // every time a new message is added this timer is reset, if the timer reaches 0 then all messages are cleared
-        if (resetTimeCurrent > 0) { resetTimeCurrent -= Time.deltaTime; }
+        if (resetTimeCurrent > 0) { resetTimeCurrent -= Time.unscaledDeltaTime; }
         else 
         { 
             resetTimeCurrent = 0;
@@ -68,7 +69,7 @@ public class uiMessage : MonoBehaviour
     public void New(string text, string sender = "Undefined Sender")
     {
         messages.Add(text);
-        resetTimeCurrent = resetTime;
+        if (resetTime > resetTimeCurrent) { resetTimeCurrent = resetTime; }
         if (debugMessageSenders) { Debug.Log(sender + ": " + text); }
     }
     public void SetTimer(float seconds) => resetTimeCurrent = seconds;

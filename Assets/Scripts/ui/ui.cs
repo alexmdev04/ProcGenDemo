@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ui : MonoBehaviour
 {
     public static ui instance { get; private set; }
+    public Button initialButtonToFocus;
     public uiSettings settings { get; private set; }
     public uiGameOver gameOver { get; private set; }
     //public List<uiObjective> 
@@ -41,20 +43,25 @@ public class ui : MonoBehaviour
     }
     void Start()
     {
+        initialButtonToFocus.Select();
         //InvokeRepeating(nameof(uiObjectivesRefresh), 1f, 1f);
     }
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)) { settings.gameObject.SetActive(!settings.gameObject.activeSelf); }
+        //if (Input.GetKeyDown(KeyCode.Escape)) { settings.gameObject.SetActive(!settings.gameObject.activeSelf); }
         uiFadeUpdate();
         uiSpeedometerUpdate();
         uiMazeSizeUpdate();
         uiPlayerGridPositionUpdate();
-        uiPlayerLives.text = Game.instance.playerLives.ToString();
+        uiPlayerLives.text = (Game.instance.playerHits - Game.instance.playerHitsTaken).ToString();
     }
-    void Pause()
+    public void StartGame()
     {
 
+    }
+    public void Quit()
+    {
+        uiDebugConsole.instance.InternalCommandCall("quit");
     }
     /// <summary>
     /// Updates the color of the ui fade element on screen used to hide the screen, uiFadeToBlack controls the direction of the fade

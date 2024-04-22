@@ -12,7 +12,7 @@ public class Collectable : MonoBehaviour
     [SerializeField] float bobAmplitude = 1f;
     [Space] 
     [SerializeField] TMPro.TextMeshPro count;
-    [SerializeField] int[] gridIndex;
+    public LoadedMazePiece loadedMazePiece;
     float startYPosition;
 
     // Checks if this object collides with the player
@@ -21,11 +21,12 @@ public class Collectable : MonoBehaviour
         if (collision.transform.parent.TryGetComponent(out Player player)) 
         { 
             uiDebugConsole.instance.InternalCommandCall("collectpage");
+            loadedMazePiece.mazePiece.hasPaper = false;
             gameObject.SetActive(false);
         }
     }
     
-    void Start() { startYPosition = transform.position.y; gridIndex = transform.position.WorldPositionToGridIndex(); } // Sets the start position for use with bobbing
+    void Start() { startYPosition = transform.position.y; } // Sets the start position for use with bobbing
     
     void Update() // Iterates on the position and rotation of the object to give a bobbing and spinning effect
     {

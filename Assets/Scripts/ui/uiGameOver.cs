@@ -1,20 +1,27 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class uiGameOver : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI 
         papersCollectedText,
-        timeAliveText;
+        timeAliveText,
+        mazeSizeText,
+        titleText;
+    [SerializeField] Button buttonToFocus;
     bool skippedOnEnable = false;
 
     void OnEnable()
     {
         if (!skippedOnEnable) { skippedOnEnable = true; return; }
         Game.instance.Pause(true);
+        buttonToFocus.Select();
+        titleText.text = MazeGen.instance.won ? "You Win!" : "Game Over!";
         papersCollectedText.text = "Papers Collected: " + Game.instance.papersCollected + "/8";
         timeAliveText.text = "Time Alive: " + TimeSpan.FromSeconds(Game.instance.clock).TotalSeconds.ToString() + "s";
+        mazeSizeText.text = "Maze Size: " + MazeGen.instance.mazeSizeX + " x " + MazeGen.instance.mazeSizeZ;
     }
     void OnDisable()
     {

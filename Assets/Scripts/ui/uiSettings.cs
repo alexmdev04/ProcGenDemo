@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class uiSettings : MonoBehaviour
 {
@@ -8,18 +9,26 @@ public class uiSettings : MonoBehaviour
         renderDistanceInputField,
         mazeSizeXInputField,
         mazeSizeZInputField;
+    [SerializeField] Button 
+        buttonToFocus;
     public GameObject 
         resetMessage;
     bool skipOnEnable = false;
 
+    void Awake() 
+    {
+        mazeSizeXInputField.onValueChanged.AddListener(delegate { mazeSizeZInputField.text = mazeSizeXInputField.text; });
+    }
     void OnEnable()
     {
         if (!skipOnEnable) { skipOnEnable = true; return; }
+        if (Game.instance.paused) { gameObject.SetActive(false); }
         Game.instance.Pause(true);
+        buttonToFocus.Select();
         sensitivityInputField.text = Player.instance.lookSensitivity.y.ToString();
         renderDistanceInputField.text = MazeRenderer.instance.renderDistance.ToString();
         mazeSizeXInputField.text = MazeGen.instance.mazeSizeX.ToString();
-        mazeSizeZInputField.text = MazeGen.instance.mazeSizeZ.ToString();
+        //mazeSizeZInputField.text = MazeGen.instance.mazeSizeZ.ToString();
     }
     void OnDisable()
     {
@@ -35,6 +44,7 @@ public class uiSettings : MonoBehaviour
     }
     public void Reset()
     {
+        resetMessage.SetActive(false);
         uiDebugConsole.instance.InternalCommandCall("reset");
         Resume();
     }
@@ -58,8 +68,7 @@ public class uiSettings : MonoBehaviour
     {
         if (int.TryParse(mazeSizeXInputField.text, out int mazeSizeX))
         {
-            mazeSizeX = System.Math.Clamp(mazeSizeX, 2, 10000);
-            MazeGen.instance.mazeSizeX = mazeSizeX;
+            MazeGen.instance.mazeSizeXNew = mazeSizeX;
             resetMessage.SetActive(true);
         }
     }
@@ -68,7 +77,7 @@ public class uiSettings : MonoBehaviour
         if (int.TryParse(mazeSizeZInputField.text, out int mazeSizeZ))
         {
             mazeSizeZ = System.Math.Clamp(mazeSizeZ, 2, 10000);
-            MazeGen.instance.mazeSizeZ = mazeSizeZ;
+            MazeGen.instance.mazeSizeZNew = mazeSizeZ;
             resetMessage.SetActive(true);
         }
     }

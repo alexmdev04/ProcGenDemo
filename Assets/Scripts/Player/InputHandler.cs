@@ -45,10 +45,15 @@ public class InputHandler : MonoBehaviour
         // jump
         if (input.Player.Jump.WasPressedThisFrame()) { Player.instance.Jump(); }
 
+        // reset
+        if (input.Player.Reset.WasPressedThisFrame()) { uiDebugConsole.instance.InternalCommandCall("reset"); }
 
         // toggle torch
         if (input.Player.Torch.WasPressedThisFrame()) { TorchHandler.instance.ToggleTorch(); }
 
+        // toggle pause
+        if (input.Player.Pause.WasPressedThisFrame()) { ui.instance.settings.gameObject.SetActive(!ui.instance.settings.gameObject.activeSelf); }
+        if (input.UI.Unpause.WasPressedThisFrame()) { ui.instance.settings.gameObject.SetActive(!ui.instance.settings.gameObject.activeSelf); }
 	}
     public void SetActive(bool state)
     {
