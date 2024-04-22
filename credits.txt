@@ -1,0 +1,3 @@
+https://opengameart.org/content/27-bricks by SpiderDave
+https://github.com/vrm-c/UniVRM by VRM Consortium
+Unity 2022.3.0f1

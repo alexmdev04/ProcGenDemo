@@ -10,15 +10,17 @@ using static UnityEngine.GraphicsBuffer;
 public static class Extensions
 {
     const string
-        ext_timeDays = "d ",
-        ext_timeHours = "h ",
-        ext_timeMinutes = "m ",
-        ext_timeSeconds = "s ",
-        ext_comma = ", ",
-        ext_leftBracket = "(",
-        ext_rightBracket = ")",
-        ext_notApplicable = "n/a",
-        ext_zeroSec = "0s";
+        str_timeDays = "d ",
+        str_timeHours = "h ",
+        str_timeMinutes = "m ",
+        str_timeSeconds = "s ",
+        str_commaSpace = ", ",
+        str_leftBracket = "(",
+        str_rightBracket = ")",
+        str_notApplicable = "n/a",
+        str_zeroSec = "0s",
+        str_quote = "\"",
+        str_quoteCommaNewLine = "\",\n";
 
     readonly static Dictionary<Key, string> keyStrings = new()
     {
@@ -113,10 +115,10 @@ public static class Extensions
     {
         TimeSpan ts = TimeSpan.FromSeconds((int)seconds);
         return
-            (ts.Days > 0 ? ts.Days.ToString() + ext_timeDays : string.Empty) +
-            (ts.Hours > 0 ? ts.Hours.ToString() + ext_timeHours : string.Empty) +
-            (ts.Minutes > 0 ? ts.Minutes.ToString() + ext_timeMinutes : string.Empty) +
-            (ts.Seconds > 0 ? ts.Seconds.ToString() + ext_timeSeconds : ext_zeroSec);
+            (ts.Days > 0 ? ts.Days.ToString() + str_timeDays : string.Empty) +
+            (ts.Hours > 0 ? ts.Hours.ToString() + str_timeHours : string.Empty) +
+            (ts.Minutes > 0 ? ts.Minutes.ToString() + str_timeMinutes : string.Empty) +
+            (ts.Seconds > 0 ? ts.Seconds.ToString() + str_timeSeconds : str_zeroSec);
     }
     /// <summary>
     /// Calculates the greatest common denominator of a and b
@@ -126,7 +128,7 @@ public static class Extensions
     /// <returns></returns>
     public static float CalcGCD(float a, float b)
     {
-        while (a != 0f && b != 0f)
+        while (a != 0f & b != 0f)
         {
             if (a > b)
                 a %= b;
@@ -145,10 +147,22 @@ public static class Extensions
     /// <returns></returns>
     public static StringBuilder ToStringBuilder(this Vector3 vector3)
     {
-        return new StringBuilder().Append(ext_leftBracket)
-            .Append(vector3.x.ToString()).Append(ext_comma)
-            .Append(vector3.y.ToString()).Append(ext_comma)
-            .Append(vector3.z.ToString()).Append(ext_rightBracket);
+        return new StringBuilder().Append(str_leftBracket)
+            .Append(vector3.x.ToString()).Append(str_commaSpace)
+            .Append(vector3.y.ToString()).Append(str_commaSpace)
+            .Append(vector3.z.ToString()).Append(str_rightBracket);
+    }
+        /// <summary>
+    /// Converts a Vector3Int to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector3"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector3Int vector3)
+    {
+        return new StringBuilder().Append(str_leftBracket)
+            .Append(vector3.x.ToString()).Append(str_commaSpace)
+            .Append(vector3.y.ToString()).Append(str_commaSpace)
+            .Append(vector3.z.ToString()).Append(str_rightBracket);
     }
     /// <summary>
     /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
@@ -157,9 +171,20 @@ public static class Extensions
     /// <returns></returns>
     public static StringBuilder ToStringBuilder(this Vector2 vector2)
     {
-        return new StringBuilder().Append(ext_leftBracket)
-            .Append(vector2.x.ToString()).Append(ext_comma)
-            .Append(vector2.y.ToString()).Append(ext_rightBracket);
+        return new StringBuilder().Append(str_leftBracket)
+            .Append(vector2.x.ToString()).Append(str_commaSpace)
+            .Append(vector2.y.ToString()).Append(str_rightBracket);
+    }
+    /// <summary>
+    /// Converts a Vector3 to a StringBuilder containing the values like this (x, y, z)
+    /// </summary>
+    /// <param name="vector2"></param>
+    /// <returns></returns>
+    public static StringBuilder ToStringBuilder(this Vector2Int vector2)
+    {
+        return new StringBuilder().Append(str_leftBracket)
+            .Append(vector2.x.ToString()).Append(str_commaSpace)
+            .Append(vector2.y.ToString()).Append(str_rightBracket);
     }
     /// <summary>
     /// Converts an array of Colliders to a StringBuilder containing a comma-separated list of all the Collider's GameObject's names
@@ -168,12 +193,12 @@ public static class Extensions
     /// <param name="ifNullText"></param>
     /// <param name="ifEmptyText"></param>
     /// <returns></returns>
-    public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = ext_notApplicable, string ifEmptyText = ext_notApplicable)
+    public static StringBuilder ToStringBuilder(this Collider[] colliders, string ifNullText = str_notApplicable, string ifEmptyText = str_notApplicable)
     {
         StringBuilder a = new();
         if (colliders == null) { return a.Append(ifNullText); }
         if (colliders.Length == 0) { return a.Append(ifEmptyText); }
-        foreach (Collider collider in colliders) { if (collider != null) { a.Append(collider.gameObject.name).Append(ext_comma); } }
+        foreach (Collider collider in colliders) { if (collider != null) { a.Append(collider.gameObject.name).Append(str_commaSpace); } }
         return a;
     }
     public static bool AllCharsAreDigits(this char[] chars)
@@ -265,7 +290,7 @@ public static class Extensions
     public static string ToStringQuoted(this List<string> list)
     {
         StringBuilder output = new();
-        foreach (string text in list) { output.Append("\"").Append(text).Append("\",\n"); }
+        foreach (string text in list) { output.Append(str_quote).Append(text).Append(str_quoteCommaNewLine); }
         return output.ToString();
     }
     public static Vector2 GetPositionOfLastLetter(this TMPro.TextMeshProUGUI tmp_text)
@@ -362,14 +387,88 @@ public static class Extensions
     }
     public static bool RandomBool()
     {
-        return Convert.ToBoolean(UnityEngine.Random.Range(0, 2));
-    }
-    public static void IfFalseIgnore(this ref bool value, bool statement)
-    {
-        if (statement) { value = true; }
+        return Convert.ToBoolean(Game.instance.random.Next(0, 2));
     }
     public static void IfFalseIgnore(this ref bool value, bool statement, bool output = true)
     {
         if (statement) { value = output; }
+    }
+    public static bool IfFalseIgnore(bool value, bool statement, bool output = true)
+    {
+        return statement ? output : value;
+    }
+    public static Vector3Int Diff(Vector3Int value1, Vector3Int value2)
+    {
+        return new Vector3Int(Math.Abs(value1.x - value2.x), Math.Abs(value1.y - value2.y), Math.Abs(value1.z - value2.z));
+    }
+    // i know these aren't null/length checked, but I'm lazy
+    
+    public static void Add<T>(this T[] array, T value)
+    {
+        Array.Resize<T>(ref array, array.Length + 1);
+        array[^1] = value;
+    }
+    public static void RemoveLast<T>(this T[] array)
+    {
+        array[^1] = default(T);
+        Array.Resize<T>(ref array, array.Length - 1);
+    }
+}
+public static class GridIndexExt 
+{
+    const string         
+        str_comma = ",",
+        str_leftBracket = "(",
+        str_rightBracket = ")";
+
+    public static int[] Plus    (this int[] value1, int[] value2) => new int[2] { value1[0] + value2[0], value1[1] + value2[1] };
+    public static int[] Plus    (this int[] value1, int   value2) => new int[2] { value1[0] + value2,    value1[1] + value2    };
+    //public static void  Plus    (ref int[] value1, ref int[] value2) { value1[0] += value2[0]; value1[1] += value2[1]; }
+    //public static int[] Plus    (int[] value1, int[] value2) { return new int[2]{ value1[0] + value2[0], value1[1] + value2[1] }; }
+    //public static void  Plus    (ref int[] value1, ref int value2) { value1[0] += value2; value1[1] += value2; }
+    //public static int[] Plus    (int[] value1, int value2) { value1[0] += value2; value1[1] += value2; return value1; }
+    
+    // public static int[] Subtract(this int[] value1, int[] value2) => new int[2] { value1[0] - value2[0], value1[1] - value2[1] };
+    // public static int[] Subtract(this int[] value1, int   value2) => new int[2] { value1[0] - value2,    value1[1] - value2    };
+    public static void  Subtract(ref int[] value1, ref int[] value2) { value1[0] -= value2[0]; value1[1] -= value2[1]; }
+    public static void  Subtract(ref int[] value1, ref int   value2) { value1[0] -= value2; value1[1] -= value2; }
+    // public static int[] Multiply(this int[] value1, int[] value2) => new int[2] { value1[0] * value2[0], value1[1] * value2[1] };
+    // public static int[] Multiply(this int[] value1, int   value2) => new int[2] { value1[0] * value2,    value1[1] * value2    };
+    public static void  Multiply(ref int[] value1, ref int[] value2) { value1[0] *= value2[0]; value1[1] *= value2[1]; }
+    public static void  Multiply(ref int[] value1, ref int   value2) { value1[0] *= value2; value1[1] *= value2; }
+    // public static int[] Divide  (this int[] value1, int[] value2) => new int[2] { value1[0] / value2[0], value1[1] / value2[1] };
+    // public static int[] Divide  (this int[] value1, int   value2) => new int[2] { value1[0] / value2,    value1[1] / value2    };
+    public static void  Divide  (ref int[] value1, ref int[] value2) { value1[0] /= value2[0]; value1[1] /= value2[1]; }
+    public static void  Divide  (ref int[] value1, ref int   value2) { value1[0] /= value2; value1[1] /= value2; }
+    //public static void  Negative(ref int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; }
+    //public static int[] Negative(int[] value) { value[0] = 0 - value[0]; value[1] = 0 - value[1]; return value; }
+    public static int[] Negative(this int[] value) => new int[2] { -value[0], -value[1] };
+
+    public static Vector3Int ToVector(this int[] value) => new(value[0], 0, value[1]);
+    public static Vector3Int ToVector(this int[] value, int y) => new(value[0], y, value[1]);
+    public static Vector3Int ToVector(this int[] value, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, 0, value[1] * scaleZ);
+    public static Vector3Int ToVector(this int[] value, int y, int scaleX = 1, int scaleZ = 1) => new(value[0] * scaleX, y, value[1] * scaleZ);
+
+    public static Vector3 GridIndexToWorldPosition(this int[] value, int y = 0) => new(value[0] * MazeGen.instance.mazePieceSize, y, value[1] * MazeGen.instance.mazePieceSize);
+    public static int[] WorldPositionToGridIndex(this Vector3 value) => new int[2]{ Mathf.FloorToInt(value.x / MazeGen.instance.mazePieceSize), Mathf.FloorToInt(value.z / MazeGen.instance.mazePieceSize) };
+    public static StringBuilder ToStringBuilder(this int[] value) // this one is tho
+    {
+        if (value.Length == 0) { return new StringBuilder(); }
+        return new StringBuilder(str_leftBracket).Append(value[0].ToString()).Append(str_comma).Append(value[1].ToString()).Append(str_rightBracket);
+    }
+    public static bool EqualTo(this int[] x, int[] y)
+    {
+        if (x.Length != y.Length)
+        {
+            return false;
+        }
+        for (int i = 0; i < x.Length; i++)
+        {
+            if (x[i] != y[i])
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

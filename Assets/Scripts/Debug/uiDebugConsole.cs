@@ -1,12 +1,10 @@
-using System.Collections.Generic;
-using UnityEngine;
-using TMPro;
-using System.Linq;
 using System;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using System.Reflection;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 public class uiDebugConsole : MonoBehaviour
 {
@@ -47,13 +45,24 @@ public class uiDebugConsole : MonoBehaviour
     }
     void vsync()
     {
-        QualitySettings.vSyncCount = QualitySettings.vSyncCount == 0 ? 1 : 0;
+        bool vSyncEnabled = QualitySettings.vSyncCount == 1;
+        QualitySettings.vSyncCount = vSyncEnabled ? 0 : 1;
+        uiMessage.instance.New("vSync " + (vSyncEnabled ? "disabled" : "enabled"));
     }
-    void fov() { }
-    void torch() { }
-    void quit() { }
-    void gfx() { }
-    void debugUpdateRate() { }
+    void fov() 
+    {   
+        if (consoleInput.Length > 1)
+        {
+            if (int.TryParse(consoleInput[1], out int value))
+            {
+                CameraHandler.mainCamera.fieldOfView = 
+                    Extensions.FOVHorizontalToVertical(value, CameraHandler.mainCamera);
+            }
+        }
+        else { InvalidInput(); }
+    }
+    void quit() { Application.Quit(); }
+    void debugUpdateRate() {  }
     void interact()
     {
         if (consoleInput.Length > 1)
@@ -74,45 +83,53 @@ public class uiDebugConsole : MonoBehaviour
         uiMessage.instance.New("Welcome back, Mr. McQueen");
         ui.instance.ToggleSpeedometer();
     }
-    void dev() { }
-    void menu() { }
-    void player() { }
-
+    void renderdistance()
+    {
+        if (int.TryParse(consoleInput[1], out int renderDistance))
+        {
+            MazeRenderer.instance.SetRenderDistance(renderDistance);
+        }
+        else
+        {
+            InvalidInput();
+        }
+    }
     void Awake()
     {
         instance = this;
+        inputField = GetComponent<TMP_InputField>();
+        inputField.onSubmit.AddListener((string playerInput) => Command(playerInput));
+        gameObject.SetActive(false);
+        defaultProfile = Game.instance.globalVolume.profile;
+    }
+    public void Start()
+    {
         // to add a new command, just duplicate a command below and replace the string with the 
         commands = new()
         {
             { "ping", ping },
             { "noclip", noclip },
-            { "god", god },
+            { "god", god }, { "godmode", god },
             { "fps", fps },
             { "vsync", vsync },
             { "fov", fov },
-            { "torch", torch },
-            { "quit", quit },
-            { "gfx", gfx },
-            { "debugUpdateRate", debugUpdateRate },
+            { "quit", quit }, { "exit", quit },
+            { "debugupdaterate", debugUpdateRate },
             { "interact", interact },
             { "iamspeed", ToggleSpeedometer },
-            { "dev", dev },
+            { "renderdistance", renderdistance }, { "rd", renderdistance },
+            { "reset", MazeGen.instance.Reset }, { "restart", MazeGen.instance.Reset },
+            { "collectpage", Game.instance.CollectPage },
+            { "attack", Game.instance.AttackPlayer }
         };
         commandKeyList = commands.Keys.ToList();
         commandKeyList.Sort();
-        inputField = GetComponent<TMP_InputField>();
-        inputField.onSubmit.AddListener((string playerInput) => Command(playerInput) );
-        gameObject.SetActive(false);
-        defaultProfile = Game.instance.globalVolume.profile;
     }
     void Update()
     {
         inputField.ActivateInputField();
         PreviousInput();
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            AutoFill();
-        }
+        //if (Input.GetKeyDown(KeyCode.Tab)) { AutoFill(); }
     }
     void OnDisable()
     {
@@ -122,24 +139,19 @@ public class uiDebugConsole : MonoBehaviour
     }
     void Command(string input)
     {
-        string outputMsg = string.Empty;
         previousInputs.Insert(1, input);
         string[] parsedInput = ParseInput(input);
 
         //typeof(uiDebugConsole).GetMethod(parsedInput[0]).Invoke(instance, null);
-
+        
+        consoleInput = parsedInput;
         if (commands.TryGetValue(parsedInput[0].ToLower(), out Action action))
         {
-            consoleInput = parsedInput;
             action();
         }
         else { InvalidCommand(); }
         inputField.text = "";
-        if (outputMsg != string.Empty)
-        {
-            uiMessage.instance.New(outputMsg, uiDebug.str_uiDebugConsole);
-            if (uiDebug.instance.debugMode) { Debug.Log(outputMsg); }
-        }
+
         gameObject.SetActive(false);
         if (outputCommandInputs) { logConsoleInputs(); }
     }
@@ -164,25 +176,27 @@ public class uiDebugConsole : MonoBehaviour
         {
             if (i + 1 == spaceIndexes.Count)
             {
-                returnInput.Add(new string(chars[(spaceIndexes[i]+1)..]));
+                returnInput.Add(new string(chars[(spaceIndexes[i] + 1)..]));
             }
             else
             {
-                returnInput.Add(new string(chars[(spaceIndexes[i]+1)..spaceIndexes[i + 1]]));
+                returnInput.Add(new string(chars[(spaceIndexes[i] + 1)..spaceIndexes[i + 1]]));
             }
         }
-        consoleInput = returnInput.ToArray();
+        //consoleInput = returnInput.ToArray();
+
         return returnInput.ToArray();
     }
+
     void AutoFill()
     {
         char[] inputChars = inputField.text.ToCharArray();
-        List<string> 
+        List<string>
             matches = new(),
             currentCommandKeyList = commandKeyList;
         if (inputChars.Length > 0)
         { //  no worky
-            do 
+            do
             {
                 for (int b = 0; b < currentCommandKeyList.Count; b++)
                 {
@@ -217,16 +231,16 @@ public class uiDebugConsole : MonoBehaviour
             inputField.MoveTextEnd(false);
         }
     }
-    public void InvalidCommand(string commandOverride = default)
+    public void InvalidCommand(string commandOverride = "")
     {
-        string commandOutput = commandOverride == default ? consoleInput[0] : commandOverride;
+        string commandOutput = commandOverride == "" ? consoleInput[0] : commandOverride;
         uiMessage.instance.New("Invalid Command: " + commandOutput, uiDebug.str_uiDebugConsole);
     }
     public void InvalidInput(string dataOverride = default, string commandOverride = default)
     {
         string dataOutput = dataOverride == default ? consoleInput[1] : dataOverride;
         string commandOutput = commandOverride == default ? consoleInput[0] : commandOverride;
-        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);   
+        uiMessage.instance.New("Invalid input \"" + dataOutput + "\" for \"" + commandOutput + "\" command", uiDebug.str_uiDebugConsole);
     }
     public void InputMissing()
     {

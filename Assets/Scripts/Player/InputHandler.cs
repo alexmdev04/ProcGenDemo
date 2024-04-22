@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 
 public class InputHandler : MonoBehaviour
 { 
@@ -16,7 +17,7 @@ public class InputHandler : MonoBehaviour
     }
     void Update()
     {
-        if (!active || uiDebugConsole.instance.gameObject.activeSelf) 
+        if (!active | uiDebugConsole.instance.gameObject.activeSelf) 
         {
             Player.instance.mouseDelta = Vector2.zero;
             Player.instance.movementDirection = Vector3.zero;
@@ -27,8 +28,14 @@ public class InputHandler : MonoBehaviour
         Player.instance.mouseDelta = input.Player.Look.ReadValue<Vector2>() * Player.instance.mouseDeltaMultiplier;
 
         // movement vector
-        Player.instance.movementDirection = input.Player.Move.ReadValue<Vector3>();
 
+        //Vector3 movementDirectionKBM = input.Player.Move.bindings[0]..ReadValue<Vector3>();
+        //Vector2 movementDirectionStick = input.Player.Move.ReadValue<Vector2>();
+        Vector2 movementDirectionVector2 = input.Player.Move.ReadValue<Vector2>();
+        Player.instance.movementDirection = new(movementDirectionVector2.x, 0, movementDirectionVector2.y);
+
+        //Player.instance.movementDirection = input.Player.Move.ReadValue<Vector3>();
+        
         // sprint
         Player.instance.SetSprint(input.Player.Sprint.IsPressed());
 
@@ -38,10 +45,15 @@ public class InputHandler : MonoBehaviour
         // jump
         if (input.Player.Jump.WasPressedThisFrame()) { Player.instance.Jump(); }
 
+        // reset
+        if (input.Player.Reset.WasPressedThisFrame()) { uiDebugConsole.instance.InternalCommandCall("reset"); }
 
         // toggle torch
         if (input.Player.Torch.WasPressedThisFrame()) { TorchHandler.instance.ToggleTorch(); }
 
+        // toggle pause
+        if (input.Player.Pause.WasPressedThisFrame()) { ui.instance.settings.gameObject.SetActive(!ui.instance.settings.gameObject.activeSelf); }
+        if (input.UI.Unpause.WasPressedThisFrame()) { ui.instance.settings.gameObject.SetActive(!ui.instance.settings.gameObject.activeSelf); }
 	}
     public void SetActive(bool state)
     {
