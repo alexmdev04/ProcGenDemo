@@ -41,7 +41,6 @@ public class MazeRenderer : MonoBehaviour
         for (int i = 0; i < loadedMazePieces.Count; i++) { ReturnToPool(loadedMazePieces[i]); }
         loadedMazePieces.Clear();
         initialRenderComplete = false;
-        //ResetPool();
         SetPoolSize(GetPoolSize());
     }
     public void MazeRenderUpdate()
@@ -58,7 +57,7 @@ public class MazeRenderer : MonoBehaviour
             for (int z = start; z >= -start; z--)
             {
                 if (z < -start) { break; }
-                if (MazeGen.instance.TryGetMazePiece(GridIndexExt.Plus(Player.instance.gridIndex, new int[2]{ x, z }) /* Player.instance.gridIndex.Plus(new int[2]{ x, z })*/, out MazePiece mazePieceToLoad)) 
+                if (MazeGen.instance.TryGetMazePiece(Player.instance.gridIndex[0] + x, Player.instance.gridIndex[1] + z, out MazePiece mazePieceToLoad)) 
                 { 
                     mazePiecesToLoad.Add(mazePieceToLoad);
                 }
@@ -88,8 +87,6 @@ public class MazeRenderer : MonoBehaviour
         if (!initialRenderComplete) { Enemy.instance.RandomPosition(); initialRenderComplete = true; };
 
         timer.Stop();
-        //Debug.Log(new StringBuilder(str_renderTime).Append(timer.Elapsed.TotalMilliseconds).Append(str_ms).ToString());
-        //Debug.Break();
     }
     public void SetRenderDistance(int renderDistanceNew)
     {
@@ -133,23 +130,20 @@ public class MazeRenderer : MonoBehaviour
         mazePiecePool.Clear();
         mazePiecePoolAvailable.Clear();
     }
-
-    // ADDING TO THE POOL WILL BE AN IJob, TryPop SHOULD WAIT UNTIL A PIECE IS AVAILABLE
-
     LoadedMazePiece TakeFromPool(MazePiece mazePiece)
     {
         // ASSIGNS A MazePiece TO A LoadedMazePiece FROM THE POOL, TO BE VISIBLE IN THE WORLD
         if (mazePiece.loadedMazePiece != null) { return mazePiece.loadedMazePiece; }
-        if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePieceNew)) 
+        if (!mazePiecePoolAvailable.TryPop(out LoadedMazePiece loadedMazePiece)) 
         {
             Debug.LogError("pool exceeded");
             return null;
         }
-        mazePiece.loadedMazePiece = loadedMazePieceNew;
-        loadedMazePieceNew.mazePiece = mazePiece;
-        loadedMazePieceNew.Refresh();
-        loadedMazePieceNew.gameObject.SetActive(true);
-        return loadedMazePieceNew;
+        mazePiece.loadedMazePiece = loadedMazePiece;
+        loadedMazePiece.mazePiece = mazePiece;
+        loadedMazePiece.Refresh();
+        loadedMazePiece.gameObject.SetActive(true);
+        return loadedMazePiece;
     }
     void ReturnToPool(LoadedMazePiece loadedMazePiece)
     {
@@ -157,7 +151,7 @@ public class MazeRenderer : MonoBehaviour
         loadedMazePiece.gameObject.name = str_mazePiecePooled;
         loadedMazePiece.gameObject.SetActive(false);
         loadedMazePiece.mazePiece.loadedMazePiece = null;
-        loadedMazePiece.mazePiece = MazeGen.instance.mazePieceDefault;
+        loadedMazePiece.mazePiece = null;
         mazePiecePoolAvailable.Push(loadedMazePiece);
     }  
     int GetPoolSize()

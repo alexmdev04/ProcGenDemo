@@ -162,6 +162,8 @@ MonoBehaviour:
   enemy: {fileID: 1455124392}
   mazeSizeX: 10
   mazeSizeZ: 10
+  mazeSizeXNew: 0
+  mazeSizeZNew: 0
   mazePieceSize: 10
   mazeSizeCount: 0
   mazePieceGrid: []

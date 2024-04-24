@@ -7,7 +7,6 @@ public class LoadedMazePiece : MonoBehaviour
     public MazePiece 
         mazePiece;
     public GameObject
-        debugArrow,
         wallFwd,
         wallBack,
         wallLeft,
@@ -25,14 +24,5 @@ public class LoadedMazePiece : MonoBehaviour
         wallLeft.SetActive(mazePiece.walls[2]);
         wallRight.SetActive(mazePiece.walls[3]);
         paper.gameObject.SetActive(mazePiece.hasPaper);
-        debugArrow.SetActive(mazePiece.passed & mazePiece.debug);
     }
-    // void Update()
-    // {
-    //     if (mazePiece.debug)
-    //     {
-    //         Popcron.Gizmos.Bounds(new Bounds(transform.position + new Vector3(5f, 10f, 5f), Vector3.one * 10f), mazePiece.debugBoxColor);
-    //         debugArrow.transform.localEulerAngles = new Vector3(0f, mazePiece.toDirection.ToVector().VectorNormalToCardinal().Euler(), 0f);
-    //     }
-    // }
 }

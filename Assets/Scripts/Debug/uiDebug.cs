@@ -153,7 +153,11 @@ public class uiDebug : MonoBehaviour
             uiStatsMiscellaneous.text = string.Empty;
             return;
         }
-        uiStatsPlayer.text = Player.instance.debugGetStats().ToString();
+        uiStatsPlayer.text = Player.instance.debugGetStats()
+            .Append("\nmazeGenTime = ")
+            .Append((MazeGen.instance.allocationTime + MazeGen.instance.algorithmTime).TotalMilliseconds)
+            .Append("ms (Alloc: ").Append(MazeGen.instance.allocationTime.TotalMilliseconds)
+            .Append("ms, Algo: ").Append(MazeGen.instance.algorithmTime.TotalMilliseconds).Append("ms)").ToString();
         uiStatsMiscellaneous.text = new StringBuilder("<u>Miscellaneous;</u>")
             .Append("\nuiFadeAlpha = ").Append(ui.instance.uiFadeAlpha).ToString();
             //.Append("\nplayerVisible = ").Append(StealthHandler.instance.playerVisible).ToString();
