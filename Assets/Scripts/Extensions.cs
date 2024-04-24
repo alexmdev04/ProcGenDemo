@@ -456,7 +456,7 @@ public static class GridIndexExt
         if (value.Length == 0) { return new StringBuilder(); }
         return new StringBuilder(str_leftBracket).Append(value[0].ToString()).Append(str_comma).Append(value[1].ToString()).Append(str_rightBracket);
     }
-    public static bool EqualTo(this int[] x, int[] y)
+    public static bool EqualTo1(this int[] x, int[] y)
     {
         if (x.Length != y.Length)
         {
@@ -470,5 +470,9 @@ public static class GridIndexExt
             }
         }
         return true;
+    }
+    public static bool EqualTo(this int[] x, int[] y)
+    {
+        return x[0] == y[0] & x[1] == y[1];
     }
 }

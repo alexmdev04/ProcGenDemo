@@ -9735,7 +9735,9 @@ MonoBehaviour:
     flatvel = (0, 0, 0), magnitude = 0
 
     velocity
-    = (0, 0, 0)'
+    = (0, 0, 0)
+
+    mazeGenTime = 0000ms (Alloc: 000ms, Algo: 000ms)'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 023d68239a61e434cbd7e000adcb923d, type: 2}
   m_sharedMaterial: {fileID: -587005052931599582, guid: 023d68239a61e434cbd7e000adcb923d,
